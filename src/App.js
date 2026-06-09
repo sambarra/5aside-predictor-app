@@ -92,6 +92,7 @@ function AppInner() {
         maxWidth: 600,
         margin: '0 auto',
         borderBottom: '1px solid var(--border)',
+        marginTop: 6,
       }}>
         <button
           className="btn btn-ghost btn-sm"

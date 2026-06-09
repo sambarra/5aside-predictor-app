@@ -371,3 +371,82 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
   .team-name { font-size: 13px; }
   .page { padding: 16px 12px 90px; }
 }
+
+/* ── UI refinements ── */
+
+/* Smoother transitions globally */
+button, .btn, .card, .match-card, .input, select.input {
+  transition: all 0.15s ease;
+}
+
+/* Top bar refinement — more breathing room */
+.top-bar {
+  padding: 14px 16px 12px;
+  margin-bottom: 2px;
+}
+
+/* Nav strip — tighter, cleaner */
+.page { padding-top: 12px; }
+
+/* Better card hover */
+.match-card:hover { border-color: rgba(0,255,106,0.18); }
+
+/* Score inputs — rounder, more tactile */
+.score-input {
+  border-radius: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Leaderboard rows — subtle hover */
+.lb-row { transition: background 0.12s ease; }
+.lb-row:hover { background: rgba(255,255,255,0.03); }
+
+/* Badge refinements */
+.badge { font-size: 10px; letter-spacing: 0.04em; }
+
+/* Input focus ring — green glow */
+.input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0,255,106,0.08);
+}
+
+/* Bottom nav — slightly taller touch targets */
+.tab-nav-item {
+  padding: 12px 4px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+/* Page title refinement */
+.page-title { letter-spacing: 0.02em; margin-bottom: 2px; }
+.page-sub { font-size: 13px; margin-bottom: 20px; }
+
+/* Match header — cleaner */
+.match-header { padding: 9px 14px; }
+
+/* Dividers — slightly more visible */
+.divider { background: rgba(255,255,255,0.07); }
+
+/* Green button glow on hover */
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(0,255,106,0.2);
+}
+
+/* Outline button */
+.btn-outline:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+/* Progress bar — slightly taller */
+.progress-bar { height: 5px; border-radius: 3px; }
+.progress-fill { border-radius: 3px; }
+
+/* Sticky date headers in fixtures */
+@supports (backdrop-filter: blur(10px)) {
+  .sticky-date { backdrop-filter: blur(12px) saturate(1.5); }
+}
+
+/* Smooth page fade-in */
+.page { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
