@@ -3,19 +3,9 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { TOURNAMENT_PREDICTIONS_CONFIG, ALL_TEAMS } from '../data/fixtures';
+import { SQUADS } from '../data/squads';
 
-const GOLDEN_BOOT_PLAYERS = [
-  'Kylian Mbappé (France)', 'Erling Haaland (Norway)', 'Lionel Messi (Argentina)',
-  'Vinicius Jr (Brazil)', 'Harry Kane (England)', 'Bukayo Saka (England)',
-  'Phil Foden (England)', 'Jude Bellingham (England)', 'Lamine Yamal (Spain)',
-  'Pedri (Spain)', 'Jamal Musiala (Germany)', 'Florian Wirtz (Germany)',
-  'Kai Havertz (Germany)', 'Memphis Depay (Netherlands)', 'Cody Gakpo (Netherlands)',
-  'Richarlison (Brazil)', 'Rodrygo (Brazil)', 'Raphinha (Brazil)',
-  'Romelu Lukaku (Belgium)', 'Son Heung-min (South Korea)',
-  'Darwin Núñez (Uruguay)', 'Luis Suárez (Uruguay)',
-  'Dusan Vlahovic (Serbia)', 'Aleksandar Mitrovic (Serbia)',
-  'Other',
-];
+// Golden boot players now come from SQUADS data
 
 const DEADLINE = new Date('2026-06-11T18:00:00+01:00'); // 2hrs before first match
 
@@ -135,9 +125,16 @@ export default function TournamentPredictions() {
                 value={picks.golden_boot}
                 onChange={e => setPicks(p => ({ ...p, golden_boot: e.target.value }))}
                 disabled={locked}
+                style={{ maxHeight: 200 }}
               >
                 <option value="">Select a player...</option>
-                {GOLDEN_BOOT_PLAYERS.map(p => <option key={p} value={p}>{p}</option>)}
+                {Object.entries(SQUADS).map(([team, players]) => (
+                  <optgroup key={team} label={team}>
+                    {players.map(p => (
+                      <option key={`${team}-${p}`} value={`${p} (${team})`}>{p}</option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             ) : (
               <select

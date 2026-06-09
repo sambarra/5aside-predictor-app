@@ -156,16 +156,16 @@ export default function Leaderboard() {
           </div>
           <div className="divider" style={{ margin: '4px 0' }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Tournament winner</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+20pts</span>
+            <span>Tournament winner</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+30pts</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Runner up</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+15pts</span>
+            <span>Runner up</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+20pts</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
             <span>Third place</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+10pts</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Golden Boot</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+15pts</span>
+            <span>Golden Boot</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+20pts</span>
           </div>
         </div>
       </div>

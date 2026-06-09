@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { doc, setDoc, getDocs, collection } from 'firebase/firestore';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
 
-const ADMIN_PIN = '5aside2026'; // Change this to whatever you want
+const ADMIN_PIN = 'WC2026admin';
 
 export default function Admin() {
   const [authed, setAuthed] = useState(false);

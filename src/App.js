@@ -78,7 +78,7 @@ function AppInner() {
             style={{ padding: '6px 10px', fontSize: 12 }}
             onClick={() => { if (window.confirm('Log out?')) logout(); }}
           >
-            Out
+            Log out
           </button>
         </div>
       </div>

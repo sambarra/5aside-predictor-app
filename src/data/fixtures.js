@@ -112,10 +112,10 @@ export const GROUP_STAGE_FIXTURES = [
 ];
 
 export const TOURNAMENT_PREDICTIONS_CONFIG = [
-  { id: 'winner', label: 'Tournament Winner', points: 20, icon: '🏆' },
-  { id: 'runner_up', label: 'Runner Up', points: 15, icon: '🥈' },
+  { id: 'winner', label: 'Tournament Winner', points: 30, icon: '🏆' },
+  { id: 'runner_up', label: 'Runner Up', points: 20, icon: '🥈' },
   { id: 'third', label: 'Third Place', points: 10, icon: '🥉' },
-  { id: 'golden_boot', label: 'Golden Boot (Top Scorer)', points: 15, icon: '⚽' },
+  { id: 'golden_boot', label: 'Golden Boot (Top Scorer)', points: 20, icon: '⚽' },
 ];
 
 export const ALL_TEAMS = [
@@ -138,7 +138,7 @@ export const ALL_TEAMS = [
 ];
 
 export const SCORING = {
-  EXACT_SCORE: 5,
+  EXACT_SCORE: 6,
   CORRECT_RESULT: 2,
   FIRST_GOALSCORER: 3,
 };
