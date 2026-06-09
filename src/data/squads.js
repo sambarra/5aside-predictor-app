@@ -1,3 +1,4 @@
+// build-20260609
 // World Cup 2026 - Full squad lists by team
 // Source: Sky Sports, June 2026
 // Outfield players only (goalkeepers excluded for goalscorer picks)

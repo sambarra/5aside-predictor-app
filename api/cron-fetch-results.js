@@ -1,3 +1,4 @@
+// build-20260609
 // Vercel Cron Job - runs every hour automatically
 // Fetches completed World Cup results and saves to Firestore
 // Schedule defined in vercel.json

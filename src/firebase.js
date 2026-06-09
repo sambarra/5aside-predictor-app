@@ -1,3 +1,4 @@
+// build-20260609
 // REPLACE THESE VALUES with your Firebase project config
 // Found at: Firebase Console → Project Settings → Your apps → Web app → SDK setup
 

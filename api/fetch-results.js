@@ -1,3 +1,4 @@
+// build-20260609
 // Vercel Serverless Function
 // Fetches completed World Cup match results from football-data.org
 // Called from the admin panel - API key is secure server-side only
