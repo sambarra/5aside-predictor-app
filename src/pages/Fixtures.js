@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs, setDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
+import { GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 import MatchCard from '../components/MatchCard';
 
 function groupByDate(fixtures) {
@@ -121,6 +122,21 @@ export default function Fixtures() {
               {opt}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Current round scoring banner */}
+      <div style={{
+        display: 'flex', gap: 12, marginBottom: 16, padding: '10px 14px',
+        background: 'rgba(0,255,106,0.05)', border: '1px solid rgba(0,255,106,0.15)',
+        borderRadius: 'var(--radius-sm)', alignItems: 'center',
+      }}>
+        <span style={{ fontSize: 16 }}>🏟️</span>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5 }}>
+          <strong style={{ color: 'var(--green)', fontSize: 12 }}>Group Stage scoring: </strong>
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsExact}pts</span> exact score ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsResult}pts</span> correct result ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> first goalscorer
         </div>
       </div>
 

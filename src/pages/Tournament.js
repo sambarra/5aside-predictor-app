@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
@@ -8,6 +8,109 @@ import { SQUADS } from '../data/squads';
 // Golden boot players now come from SQUADS data
 
 const DEADLINE = new Date('2026-06-11T18:00:00+01:00'); // 2hrs before first match
+
+// Searchable player picker for Golden Boot
+function PlayerSearch({ value, onChange, disabled }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Build flat list of all players with team
+  const allPlayers = Object.entries(SQUADS).flatMap(([team, players]) =>
+    players.map(p => ({ label: `${p}`, sub: team, value: `${p} (${team})` }))
+  );
+
+  const filtered = query.length > 1
+    ? allPlayers.filter(p =>
+        p.label.toLowerCase().includes(query.toLowerCase()) ||
+        p.sub.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 20)
+    : [];
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  function select(player) {
+    onChange(player.value);
+    setQuery(player.label);
+    setOpen(false);
+  }
+
+  // Show selected value in input
+  useEffect(() => {
+    if (value && !query) {
+      // Extract just the player name from "Name (Team)"
+      setQuery(value.replace(/ \([^)]+\)$/, ''));
+    }
+  }, [value, query]);
+
+  if (disabled && value) {
+    return (
+      <div className="input" style={{ opacity: 0.7, cursor: 'default', color: 'var(--text)' }}>
+        {value}
+      </div>
+    );
+  }
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <input
+        className="input"
+        type="text"
+        placeholder="Type a player name or country..."
+        value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true); if (!e.target.value) onChange(''); }}
+        onFocus={() => query.length > 1 && setOpen(true)}
+        disabled={disabled}
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--surface-2)', border: '1px solid var(--border-green)',
+          borderRadius: 'var(--radius-sm)', marginTop: 4,
+          maxHeight: 240, overflowY: 'auto',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+        }}>
+          {filtered.map(p => (
+            <div
+              key={p.value}
+              onMouseDown={() => select(p)}
+              style={{
+                padding: '9px 14px', cursor: 'pointer', display: 'flex',
+                justifyContent: 'space-between', alignItems: 'center',
+                borderBottom: '1px solid var(--border)',
+                background: value === p.value ? 'rgba(0,255,106,0.06)' : undefined,
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+              onMouseLeave={e => e.currentTarget.style.background = value === p.value ? 'rgba(0,255,106,0.06)' : ''}
+            >
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{p.label}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 8 }}>{p.sub}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {open && query.length > 1 && filtered.length === 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)', marginTop: 4,
+          padding: '12px 14px', fontSize: 13, color: 'var(--text-3)',
+        }}>
+          No players found
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 export default function TournamentPredictions() {
   const { user } = useAuth();
@@ -120,22 +223,11 @@ export default function TournamentPredictions() {
             </div>
 
             {config.id === 'golden_boot' ? (
-              <select
-                className="input"
+              <PlayerSearch
                 value={picks.golden_boot}
-                onChange={e => setPicks(p => ({ ...p, golden_boot: e.target.value }))}
+                onChange={val => setPicks(p => ({ ...p, golden_boot: val }))}
                 disabled={locked}
-                style={{ maxHeight: 200 }}
-              >
-                <option value="">Select a player...</option>
-                {Object.entries(SQUADS).map(([team, players]) => (
-                  <optgroup key={team} label={team}>
-                    {players.map(p => (
-                      <option key={`${team}-${p}`} value={`${p} (${team})`}>{p}</option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
+              />
             ) : (
               <select
                 className="input"
