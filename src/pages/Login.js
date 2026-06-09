@@ -23,15 +23,20 @@ export default function Login() {
 
   return (
     <div className="login-screen">
-      <div className="login-logo">
-        5<span>aside</span>
-      </div>
-      <p className="login-sub">World Cup 2026 Predictor</p>
+      {/* Logo */}
+      <img
+        src="/5aside-logo.svg"
+        alt="5aside.com"
+        style={{ width: 220, marginBottom: 8 }}
+      />
+      <p style={{ color: 'var(--green)', fontWeight: 700, fontSize: 13, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 32 }}>
+        World Cup 2026 Predictor
+      </p>
 
       <div className="login-form">
-        <p className="login-form-title">Enter the game</p>
-        <p style={{ color: 'var(--text-2)', fontSize: '13px', marginBottom: '8px' }}>
-          New here? Just pick a name and set a PIN. Returning? Use the same name & PIN.
+        <p style={{ fontWeight: 700, fontSize: 18, marginBottom: 4, color: 'var(--text)' }}>Enter the game</p>
+        <p style={{ color: 'var(--text-2)', fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
+          New? Pick a name and set a PIN. <br />Returning? Use the same name & PIN.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -54,23 +59,23 @@ export default function Login() {
             maxLength={4}
           />
           {error && (
-            <p style={{ color: 'var(--red)', fontSize: '13px', textAlign: 'left' }}>{error}</p>
+            <p style={{ color: 'var(--red)', fontSize: 13, textAlign: 'left' }}>{error}</p>
           )}
           <button
             className="btn btn-primary btn-lg btn-full"
             type="submit"
             disabled={loading || !name.trim() || pin.length < 4}
           >
-            {loading ? 'Loading...' : 'Play'}
+            {loading ? 'Loading...' : 'Play →'}
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', padding: '14px', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-          <p style={{ fontSize: '12px', color: 'var(--text-2)', lineHeight: '1.5' }}>
-            🏆 <strong style={{ color: 'var(--text)' }}>How it works:</strong> Predict the score of every World Cup match. 
-            Earn <strong style={{ color: 'var(--green)' }}>5pts</strong> for exact scores, 
-            <strong style={{ color: 'var(--green)' }}> 2pts</strong> for correct results, 
-            <strong style={{ color: 'var(--green)' }}> 3pts</strong> for first goalscorer.
+        <div style={{ marginTop: 24, padding: '14px 16px', background: 'var(--surface)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: '1.6' }}>
+            🏆 Predict every World Cup match score.<br />
+            <span style={{ color: 'var(--green)', fontWeight: 600 }}>+5pts</span> exact score ·{' '}
+            <span style={{ color: 'var(--green)', fontWeight: 600 }}>+2pts</span> correct result ·{' '}
+            <span style={{ color: 'var(--green)', fontWeight: 600 }}>+3pts</span> first goalscorer
           </p>
         </div>
       </div>

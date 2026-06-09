@@ -1,20 +1,5 @@
 import React, { useState } from 'react';
-
-const POPULAR_SCORERS = [
-  'Kylian Mbappé', 'Erling Haaland', 'Vinicius Jr', 'Lionel Messi',
-  'Harry Kane', 'Bukayo Saka', 'Phil Foden', 'Jude Bellingham',
-  'Lamine Yamal', 'Pedri', 'Gavi', 'Alvaro Morata',
-  'Neymar Jr', 'Rodrygo', 'Richarlison', 'Raphinha',
-  'Leroy Sané', 'Kai Havertz', 'Florian Wirtz', 'Jamal Musiala',
-  'Memphis Depay', 'Cody Gakpo', 'Donyell Malen',
-  'Son Heung-min', 'Cho Gue-sung',
-  'Darwin Núñez', 'Luis Suárez', 'Rodrigo Bentancur',
-  'Wahbi Khazri', 'Youssef Msakni',
-  'Ruslan Malinovskyi', 'Viktor Tsygankov',
-  'Dusan Vlahovic', 'Aleksandar Mitrovic',
-  'Romelu Lukaku', 'Dodi Lukebakio', 'Leandro Trossard',
-  'Other / Unknown',
-];
+import { getPlayersForMatch } from '../data/squads';
 
 export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? '');
@@ -149,9 +134,21 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
                 style={{ flex: 1 }}
               >
                 <option value="">Pick a player...</option>
-                {[fixture.home + ' player', fixture.away + ' player', ...POPULAR_SCORERS].slice(0, 30).map(p => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
+                {(() => {
+                  const players = getPlayersForMatch(fixture.home, fixture.away);
+                  const homePlayers = players.filter(p => p.team === fixture.home);
+                  const awayPlayers = players.filter(p => p.team === fixture.away);
+                  return (
+                    <>
+                      <optgroup label={fixture.home}>
+                        {homePlayers.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                      </optgroup>
+                      <optgroup label={fixture.away}>
+                        {awayPlayers.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
+                      </optgroup>
+                    </>
+                  );
+                })()}
               </select>
             </div>
           </div>

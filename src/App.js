@@ -6,10 +6,9 @@ import Tournament from './pages/Tournament';
 import Leaderboard from './pages/Leaderboard';
 import Admin from './pages/Admin';
 
-// Icons
 const IconFixtures = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
 const IconTrophy = () => (
@@ -23,17 +22,14 @@ const IconLeaderboard = () => (
     <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
   </svg>
 );
-const IconUser = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-  </svg>
-);
 
 const TABS = [
   { id: 'fixtures', label: 'Predict', Icon: IconFixtures },
   { id: 'tournament', label: 'Tournament', Icon: IconTrophy },
   { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
 ];
+
+const TAB_ORDER = ['fixtures', 'tournament', 'leaderboard'];
 
 function AppInner() {
   const { user, logout, loading } = useAuth();
@@ -52,34 +48,74 @@ function AppInner() {
 
   if (showAdmin) return (
     <div>
-      <div className="top-bar">
+      <div className="top-bar" style={{ marginBottom: 8 }}>
         <button className="btn btn-ghost btn-sm" onClick={() => setShowAdmin(false)}>← Back</button>
       </div>
       <Admin />
     </div>
   );
 
+  const currentIdx = TAB_ORDER.indexOf(tab);
+  const prevTab = currentIdx > 0 ? TAB_ORDER[currentIdx - 1] : null;
+  const nextTab = currentIdx < TAB_ORDER.length - 1 ? TAB_ORDER[currentIdx + 1] : null;
+  const tabLabels = { fixtures: 'Predict', tournament: 'Tournament', leaderboard: 'Standings' };
+
   return (
     <div>
       {/* Top bar */}
       <div className="top-bar">
-        <div className="logo">5<span>aside</span> <span style={{ fontSize: 13, fontFamily: 'Inter', fontWeight: 600, color: 'var(--text-2)', letterSpacing: 0 }}>WC26</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{user.name}</span>
+        <img
+          src="/5aside-logo.svg"
+          alt="5aside.com"
+          style={{ height: 28, maxWidth: 140 }}
+        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            {user.name}
+          </span>
           <button
             className="btn btn-ghost btn-sm"
-            onClick={() => {
-              if (window.confirm('Log out?')) logout();
-            }}
-            title="Log out"
+            style={{ padding: '6px 10px', fontSize: 12 }}
+            onClick={() => { if (window.confirm('Log out?')) logout(); }}
           >
-            <IconUser />
+            Out
           </button>
         </div>
       </div>
 
+      {/* Prev / Next nav strip */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '6px 16px',
+        maxWidth: 600,
+        margin: '0 auto',
+        borderBottom: '1px solid var(--border)',
+      }}>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => prevTab && setTab(prevTab)}
+          disabled={!prevTab}
+          style={{ opacity: prevTab ? 1 : 0.2, fontSize: 12, padding: '5px 10px' }}
+        >
+          ← {prevTab ? tabLabels[prevTab] : ''}
+        </button>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {tabLabels[tab]}
+        </span>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => nextTab && setTab(nextTab)}
+          disabled={!nextTab}
+          style={{ opacity: nextTab ? 1 : 0.2, fontSize: 12, padding: '5px 10px' }}
+        >
+          {nextTab ? tabLabels[nextTab] : ''} →
+        </button>
+      </div>
+
       {/* Page content */}
-      <div style={{ paddingTop: 8 }}>
+      <div style={{ paddingTop: 4 }}>
         {tab === 'fixtures' && <Fixtures />}
         {tab === 'tournament' && <Tournament />}
         {tab === 'leaderboard' && <Leaderboard />}
@@ -97,7 +133,6 @@ function AppInner() {
             {label}
           </button>
         ))}
-        {/* Hidden admin access — triple tap the logo area or add ?admin to URL */}
         <button
           className="tab-nav-item"
           onClick={() => setShowAdmin(true)}
