@@ -9,6 +9,81 @@ import { STAGES, R32_BRACKET, KNOCKOUT_TEMPLATE } from '../data/knockoutFixtures
 
 const HARDCODED_SUPER_ADMIN = 'WC2026admin';
 
+// Tournament Result Tab - admin enters final outcomes to award bonus points
+function TournamentResultTab({ db }) {
+  const [form, setForm] = useState({ winner: '', runner_up: '', third: '', golden_boot: '' });
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  useEffect(() => {
+    getDocs(collection(db, 'tournamentResults')).then(snap => {
+      if (!snap.empty) {
+        setForm(snap.docs[0].data());
+        setSaved(true);
+      }
+    });
+  }, [db]);
+
+  async function saveTournamentResult() {
+    if (!form.winner || !form.golden_boot) return;
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'tournamentResults', 'final'), {
+        ...form, updatedAt: new Date().toISOString(),
+      });
+      setSaved(true);
+      setMsg('✓ Tournament results saved — standings will now include bonus points');
+    } catch (err) {
+      setMsg('❌ Error: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div>
+      <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 16, lineHeight: 1.6 }}>
+        Enter the final tournament outcomes after the Final. This unlocks the bonus points (+30/+20/+10/+20) in the standings.
+      </p>
+      {msg && <div style={{ padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 8, marginBottom: 14, fontSize: 13, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--red)' }}>{msg}</div>}
+      <div className="card" style={{ padding: '16px' }}>
+        {[
+          { key: 'winner', label: '🏆 Tournament Winner', pts: '+30pts' },
+          { key: 'runner_up', label: '🥈 Runner-up', pts: '+20pts' },
+          { key: 'third', label: '🥉 Third Place', pts: '+10pts' },
+          { key: 'golden_boot', label: '⚽ Golden Boot', pts: '+20pts' },
+        ].map(({ key, label, pts }) => (
+          <div key={key} style={{ marginBottom: 12 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-2)', display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span>{label}</span>
+              <span style={{ color: 'var(--green)', fontWeight: 700 }}>{pts}</span>
+            </label>
+            <input
+              className="input"
+              placeholder={key === 'golden_boot' ? 'e.g. Kylian Mbappe (France)' : 'e.g. France'}
+              value={form[key] || ''}
+              onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+            />
+          </div>
+        ))}
+        <button
+          className={`btn btn-primary btn-full ${!form.winner || !form.golden_boot ? 'btn-ghost' : ''}`}
+          onClick={saveTournamentResult}
+          disabled={saving || !form.winner || !form.golden_boot}
+          style={{ marginTop: 4 }}
+        >
+          {saving ? 'Saving...' : saved ? '✓ Update tournament results' : '🎖️ Save tournament results'}
+        </button>
+      </div>
+      <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 12, lineHeight: 1.6 }}>
+        Once saved, the standings will automatically show updated totals including tournament bonus points for all players.
+      </p>
+    </div>
+  );
+}
+
+
 // Knockout fixture management component
 function KnockoutTab({ knockoutFixtures, selectedStage, setSelectedStage, addingKnockout, setAddingKnockout, knockoutMsg, setKnockoutMsg, loadKnockoutFixtures, db }) {
   const [editFixture, setEditFixture] = useState(null);
@@ -440,7 +515,7 @@ export default function Admin({ onBack }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins'], ['knockout', '🏆 Knockout']].map(([t, label]) => (
+        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins'], ['knockout', '🏆 Knockout'], ['tournament_result', '🎖️ Final']].map(([t, label]) => (
           <button key={t} className={`btn btn-sm ${activeTab === t ? 'btn-primary' : 'btn-ghost'}`}
             onClick={() => setActiveTab(t)} style={{ flexShrink: 0 }}>{label}</button>
         ))}
@@ -572,6 +647,10 @@ export default function Admin({ onBack }) {
           loadKnockoutFixtures={loadKnockoutFixtures}
           db={db}
         />
+      )}
+
+      {activeTab === 'tournament_result' && (
+        <TournamentResultTab db={db} />
       )}
 
       {activeTab === 'admins' && (

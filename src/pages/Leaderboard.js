@@ -70,11 +70,13 @@ export default function Leaderboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [usersSnap, resultsSnap, predsSnap, leaguesSnap] = await Promise.all([
+      const [usersSnap, resultsSnap, predsSnap, leaguesSnap, tournamentResultsSnap, tournamentPredsSnap] = await Promise.all([
         getDocs(collection(db, 'users')),
         getDocs(collection(db, 'results')),
         getDocs(collection(db, 'predictions')),
         getDocs(query(collection(db, 'leagues'), where('memberIds', 'array-contains', user.id))),
+        getDocs(collection(db, 'tournamentResults')), // set by admin when tournament ends
+        getDocs(collection(db, 'tournamentPredictions')),
       ]);
 
       const users = {};
@@ -94,10 +96,29 @@ export default function Leaderboard() {
       leaguesSnap.forEach(d => leagues.push({ id: d.id, ...d.data() }));
       setMyLeagues(leagues);
 
+      // Tournament results (set by admin after final)
+      let tournamentResult = null;
+      tournamentResultsSnap.forEach(d => { tournamentResult = d.data(); });
+
+      // Tournament predictions by user
+      const tournamentPreds = {};
+      tournamentPredsSnap.forEach(d => { tournamentPreds[d.id] = d.data(); });
+
       // Calculate scores per match in kickoff order for form/history
       const sortedFixtures = [...GROUP_STAGE_FIXTURES].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
 
       Object.keys(users).forEach(uid => {
+        // Add tournament bonus points if tournament is complete
+        if (tournamentResult) {
+          const tp = tournamentPreds[uid];
+          if (tp) {
+            if (tp.winner && tp.winner === tournamentResult.winner) users[uid].points += 30;
+            if (tp.runner_up && tp.runner_up === tournamentResult.runner_up) users[uid].points += 20;
+            if (tp.third && tp.third === tournamentResult.third) users[uid].points += 10;
+            if (tp.golden_boot && tp.golden_boot === tournamentResult.golden_boot) users[uid].points += 20;
+          }
+        }
+
         const userPreds = predsByUser[uid] || {};
         let cumulative = 0;
 

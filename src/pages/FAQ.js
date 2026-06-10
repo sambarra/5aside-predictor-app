@@ -36,6 +36,10 @@ const FAQS = [
     a: 'Goals scored in extra time count — so if a match ends 1-1 after 90 minutes and one team scores in extra time to make it 2-1, the final score is 2-1. Penalty shootout goals do not count. If the match stays level through extra time and goes to a shootout, the score is recorded as the draw score at the end of extra time (e.g. 1-1). This is confirmed by how football-data.org reports results.',
   },
   {
+    q: 'When do tournament prediction bonus points get added?',
+    a: 'Tournament bonus points (Winner +30pts, Runner-up +20pts, Third +10pts, Golden Boot +20pts) are added to the standings after the Final once an admin has entered the tournament outcomes. They will not appear in the standings until the World Cup is completely finished. You can check the FAQ or standings at any time — the standings will automatically update once the results are confirmed.',
+  },
+  {
     q: 'What are Tournament Predictions?',
     a: 'Before the first match kicks off (deadline: 19:55 UK time on 11 June), you can lock in four bonus predictions: Tournament Winner (+30pts), Runner-up (+20pts), Third Place (+10pts), and Golden Boot scorer (+20pts). These cannot be changed once submitted.',
   },

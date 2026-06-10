@@ -235,19 +235,21 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
             </button>
 
             {/* Booster button */}
-            {(boosterApplied || boosterAvailable) && (
+            {onApplyBooster && (boosterApplied || boosterAvailable) && (
               <button
-                className={`btn btn-full btn-sm ${boosterApplied ? 'btn-booster-active' : 'btn-ghost'}`}
                 onClick={() => boosterApplied ? onRemoveBooster() : onApplyBooster(fixture.id)}
                 style={{
-                  marginTop: 8,
-                  background: boosterApplied ? 'rgba(255,200,0,0.15)' : undefined,
-                  border: boosterApplied ? '1px solid rgba(255,200,0,0.4)' : undefined,
+                  marginTop: 8, width: '100%', padding: '8px 12px',
+                  background: boosterApplied ? 'rgba(255,215,0,0.12)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${boosterApplied ? 'rgba(255,215,0,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: 8, cursor: 'pointer',
                   color: boosterApplied ? '#FFD700' : 'var(--text-3)',
-                  fontSize: 12,
+                  fontSize: 12, fontWeight: boosterApplied ? 700 : 400,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 }}
               >
-                {boosterApplied ? '⚡ Booster applied — tap to remove' : '⚡ Use booster on this match (2× points)'}
+                <span style={{ fontSize: 14 }}>⚡</span>
+                {boosterApplied ? 'Booster applied — tap to remove' : 'Use booster on this match (2× all points)'}
               </button>
             )}
           </div>
