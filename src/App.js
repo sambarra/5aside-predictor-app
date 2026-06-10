@@ -42,7 +42,6 @@ const TABS = [
   { id: 'fixtures', label: 'Predict', Icon: IconFixtures },
   { id: 'tournament', label: 'Tournament', Icon: IconTrophy },
   { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
-  { id: 'leagues', label: 'Leagues', Icon: IconLeagues },
 ];
 
 function MoreMenu({ onAdmin, onFAQ, onLeagues, onClose }) {
