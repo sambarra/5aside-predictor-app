@@ -1,32 +1,88 @@
-// build-20260609
-import React, { useState, useEffect } from 'react';
+// build-20260610
+import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES, SCORING } from '../data/fixtures';
+
+// Mini sparkline component for points progression
+function PointsGraph({ history }) {
+  if (!history || history.length < 2) return <p style={{ fontSize: 12, color: 'var(--text-3)', padding: '12px 0' }}>Not enough data yet</p>;
+  const max = Math.max(...history.map(h => h.cumulative), 1);
+  const w = 280, h = 60, pad = 4;
+  const pts = history.map((h, i) => ({
+    x: pad + (i / (history.length - 1)) * (w - pad * 2),
+    y: h + pad + ((max - h.cumulative) / max) * (h - pad * 2),
+  }));
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  return (
+    <div style={{ padding: '12px 0 4px' }}>
+      <p style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Points progression</p>
+      <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 60 }}>
+        <defs>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="var(--green)" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="var(--green)" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <path d={path} fill="none" stroke="url(#lineGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {pts.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r="3" fill="var(--green)" />
+        ))}
+      </svg>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-3)', marginTop: 2 }}>
+        <span>Start</span><span>Now</span>
+      </div>
+    </div>
+  );
+}
+
+// Form strip — last 5 match outcomes
+function FormStrip({ form }) {
+  if (!form?.length) return null;
+  const last5 = form.slice(-5);
+  const colors = { E: 'var(--green)', R: 'var(--amber)', W: 'var(--red)', '-': 'var(--surface-3)' };
+  const labels = { E: 'E', R: 'R', W: '✗', '-': '-' };
+  const titles = { E: 'Correct score', R: 'Correct result', W: 'Wrong', '-': 'No prediction' };
+  return (
+    <div style={{ display: 'flex', gap: 3 }}>
+      {last5.map((f, i) => (
+        <div key={i} title={titles[f]} style={{
+          width: 20, height: 20, borderRadius: 4, background: colors[f] || 'var(--surface-3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 9, fontWeight: 700, color: f === 'E' ? '#000' : '#fff',
+        }}>
+          {labels[f]}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function Leaderboard() {
   const { user } = useAuth();
   const [players, setPlayers] = useState([]);
+  const [myLeagues, setMyLeagues] = useState([]);
+  const [activeTab, setActiveTab] = useState('global');
   const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState(null);
 
-  useEffect(() => { loadLeaderboard(); }, []);
-
-  async function loadLeaderboard() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Get all users
-      const usersSnap = await getDocs(collection(db, 'users'));
-      const users = {};
-      usersSnap.forEach(d => { users[d.id] = { ...d.data(), id: d.id, points: 0, exactScores: 0, correctResults: 0, scorerPts: 0 }; });
+      const [usersSnap, resultsSnap, predsSnap, leaguesSnap] = await Promise.all([
+        getDocs(collection(db, 'users')),
+        getDocs(collection(db, 'results')),
+        getDocs(collection(db, 'predictions')),
+        getDocs(query(collection(db, 'leagues'), where('memberIds', 'array-contains', user.id))),
+      ]);
 
-      // Get all results
-      const resultsSnap = await getDocs(collection(db, 'results'));
+      const users = {};
+      usersSnap.forEach(d => { users[d.id] = { ...d.data(), id: d.id, points: 0, correctScores: 0, correctResults: 0, scorerPts: 0, form: [], history: [] }; });
+
       const results = {};
       resultsSnap.forEach(d => { results[d.id] = d.data(); });
 
-      // Get all predictions
-      const predsSnap = await getDocs(collection(db, 'predictions'));
       const predsByUser = {};
       predsSnap.forEach(d => {
         const data = d.data();
@@ -34,139 +90,211 @@ export default function Leaderboard() {
         predsByUser[data.userId][data.fixtureId] = data;
       });
 
-      // Calculate scores
+      const leagues = [];
+      leaguesSnap.forEach(d => leagues.push({ id: d.id, ...d.data() }));
+      setMyLeagues(leagues);
+
+      // Calculate scores per match in kickoff order for form/history
+      const sortedFixtures = [...GROUP_STAGE_FIXTURES].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
+
       Object.keys(users).forEach(uid => {
         const userPreds = predsByUser[uid] || {};
-        Object.entries(results).forEach(([fixtureId, result]) => {
-          const pred = userPreds[fixtureId];
-          if (!pred) return;
+        let cumulative = 0;
+
+        sortedFixtures.forEach(fixture => {
+          const result = results[fixture.id];
+          const pred = userPreds[fixture.id];
+          if (!result) return;
+
+          if (!pred) {
+            users[uid].form.push('-');
+            return;
+          }
 
           const correctScore = pred.homeScore === result.home && pred.awayScore === result.away;
-          const homeWin = result.home > result.away;
-          const awayWin = result.away > result.home;
-          const draw = result.home === result.away;
-          const predHomeWin = pred.homeScore > pred.awayScore;
-          const predAwayWin = pred.awayScore > pred.homeScore;
-          const predDraw = pred.homeScore === pred.awayScore;
+          const homeWin = result.home > result.away, awayWin = result.away > result.home, draw = result.home === result.away;
+          const predHomeWin = pred.homeScore > pred.awayScore, predAwayWin = pred.awayScore > pred.homeScore, predDraw = pred.homeScore === pred.awayScore;
           const correctResult = (homeWin && predHomeWin) || (awayWin && predAwayWin) || (draw && predDraw);
 
-          if (correctScore) {
-            users[uid].points += SCORING.EXACT_SCORE;
-            users[uid].exactScores++;
-          } else if (correctResult) {
-            users[uid].points += SCORING.CORRECT_RESULT;
-            users[uid].correctResults++;
-          }
+          let pts = 0;
+          if (correctScore) { pts += SCORING.EXACT_SCORE; users[uid].correctScores++; users[uid].form.push('E'); }
+          else if (correctResult) { pts += SCORING.CORRECT_RESULT; users[uid].correctResults++; users[uid].form.push('R'); }
+          else { users[uid].form.push('W'); }
 
           if (result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer) {
-            users[uid].points += SCORING.FIRST_GOALSCORER;
+            pts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
           }
-        });
 
-        // Tournament bonus points
-        // (Admin adds these manually via tournamentResults doc)
+          users[uid].points += pts;
+          cumulative += pts;
+          users[uid].history.push({ cumulative, matchId: fixture.id });
+        });
       });
 
       const sorted = Object.values(users)
-        .filter(u => predsByUser[u.id]) // only show users who've predicted
+        .filter(u => predsByUser[u.id])
         .sort((a, b) => b.points - a.points);
 
       setPlayers(sorted);
     } finally {
       setLoading(false);
     }
-  }
+  }, [user.id]);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   const myRank = players.findIndex(p => p.id === user.id) + 1;
 
-  if (loading) return <div className="page"><p style={{ color: 'var(--text-2)' }}>Calculating scores...</p></div>;
-
-  return (
-    <div className="page">
-      <h1 className="page-title">🥇 Leaderboard</h1>
-      <p className="page-sub">World Cup 2026 · All players</p>
-
-      {myRank > 0 && (
-        <div className="card card-green-border" style={{ marginBottom: 16, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div style={{ fontSize: 12, color: 'var(--text-2)' }}>Your position</div>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>{user.name}</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, color: 'var(--green)', lineHeight: 1 }}>
-              #{myRank}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-2)' }}>
-              {players.find(p => p.id === user.id)?.points ?? 0} pts
-            </div>
-          </div>
-        </div>
-      )}
-
-      {players.length === 0 ? (
+  function renderTable(playerList, showRank = true) {
+    if (playerList.length === 0) {
+      return (
         <div className="empty-state">
           <div className="empty-state-icon">🏟️</div>
           <h3>No scores yet</h3>
-          <p>The leaderboard will update once matches complete</p>
+          <p>Standings update as results come in</p>
         </div>
-      ) : (
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          {players.map((player, idx) => {
-            const rank = idx + 1;
-            const isMe = player.id === user.id;
-            return (
+      );
+    }
+
+    return (
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        {/* Header row */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '32px 1fr 40px 40px 80px',
+          padding: '8px 14px', borderBottom: '1px solid var(--border)',
+          background: 'var(--surface-2)',
+        }}>
+          {['#', 'Player', 'Pts', '✓', 'Form'].map((h, i) => (
+            <span key={h} style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: i > 1 ? 'center' : 'left' }}>{h}</span>
+          ))}
+        </div>
+
+        {playerList.map((player, idx) => {
+          const rank = showRank ? idx + 1 : playerList.findIndex(p => p.id === player.id) + 1;
+          const isMe = player.id === user.id;
+          const isExpanded = expanded === player.id;
+
+          return (
+            <div key={player.id}>
               <div
-                key={player.id}
-                className="lb-row"
-                style={{ background: isMe ? 'rgba(0,255,106,0.04)' : undefined }}
+                onClick={() => setExpanded(isExpanded ? null : player.id)}
+                style={{
+                  display: 'grid', gridTemplateColumns: '32px 1fr 40px 40px 80px',
+                  padding: '11px 14px', borderBottom: '1px solid var(--border)',
+                  background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
+                  cursor: 'pointer', alignItems: 'center',
+                  transition: 'background 0.1s',
+                }}
               >
-                <div className={`lb-rank ${rank <= 3 ? 'top' : ''}`}>
+                <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)' }}>
                   {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
-                </div>
-                <div className="lb-name">
-                  {player.name}
-                  {isMe && <span style={{ fontSize: 11, color: 'var(--green)', marginLeft: 6 }}>you</span>}
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div className="lb-pts">{player.points}</div>
-                  <div className="lb-pts-label">
-                    {player.exactScores}✓ · {player.correctResults}~ · +{player.scorerPts}⚽
+                </span>
+                <div>
+                  <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
+                  {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 6 }}>you</span>}
+                  <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 1 }}>
+                    {player.correctScores} correct · {player.scorerPts > 0 ? `+${player.scorerPts}⚽` : ''}
                   </div>
                 </div>
+                <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
+                <span style={{ textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>{player.correctScores}</span>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <FormStrip form={player.form} />
+                </div>
               </div>
-            );
-          })}
+
+              {isExpanded && (
+                <div style={{ padding: '4px 14px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+                  <PointsGraph history={player.history} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
+                    {[
+                      { label: 'Total pts', value: player.points },
+                      { label: 'Correct scores', value: player.correctScores },
+                      { label: 'Scorer pts', value: player.scorerPts },
+                    ].map(s => (
+                      <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                        <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)' }}>{s.value}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-3)' }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const tabs = [
+    { id: 'global', label: '🌍 Global' },
+    ...myLeagues.map(l => ({ id: l.id, label: `🏆 ${l.name}` })),
+  ];
+
+  const activeLeague = myLeagues.find(l => l.id === activeTab);
+  const displayPlayers = activeLeague
+    ? players.filter(p => activeLeague.memberIds?.includes(p.id))
+    : players;
+
+  if (loading) return <div className="page"><p style={{ color: 'var(--text-2)' }}>Calculating standings...</p></div>;
+
+  return (
+    <div className="page">
+      <h1 className="page-title">📊 Standings</h1>
+
+      {/* My position card */}
+      {myRank > 0 && (
+        <div className="card card-green-border" style={{ marginBottom: 16, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your position</div>
+            <div style={{ fontWeight: 700, fontSize: 15, marginTop: 2 }}>{user.name}</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, color: 'var(--green)', lineHeight: 1 }}>#{myRank}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-2)' }}>{players.find(p => p.id === user.id)?.points ?? 0} pts</div>
+          </div>
         </div>
       )}
 
-      {/* Scoring key */}
-      <div className="card" style={{ marginTop: 20 }}>
-        <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          Scoring
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Exact score</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+{SCORING.EXACT_SCORE}pts</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Correct result (W/D/L)</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+{SCORING.CORRECT_RESULT}pts</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>First goalscorer</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+{SCORING.FIRST_GOALSCORER}pts</span>
-          </div>
-          <div className="divider" style={{ margin: '4px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Tournament winner</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+30pts</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Runner up</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+20pts</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Third place</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+10pts</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
-            <span>Golden Boot</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>+20pts</span>
+      {/* League tabs */}
+      {tabs.length > 1 && (
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`btn btn-sm ${activeTab === tab.id ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ flexShrink: 0, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Table */}
+      {renderTable(displayPlayers)}
+
+      {/* Form key */}
+      <div className="card" style={{ marginTop: 16, padding: '12px 16px' }}>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key</p>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12 }}>
+          {[['E', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['✗', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 20, height: 20, borderRadius: 4, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color, flexShrink: 0 }}>{label}</div>
+              <span style={{ color: 'var(--text-2)' }}>{desc}</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 12, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scoring</p>
+          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-2)' }}>
+            <span>Correct score <strong style={{ color: 'var(--green)' }}>+{SCORING.EXACT_SCORE}pts</strong></span>
+            <span>Correct result <strong style={{ color: 'var(--green)' }}>+{SCORING.CORRECT_RESULT}pts</strong></span>
+            <span>First goalscorer <strong style={{ color: 'var(--green)' }}>+{SCORING.FIRST_GOALSCORER}pts</strong></span>
           </div>
         </div>
       </div>

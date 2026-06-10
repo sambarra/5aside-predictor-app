@@ -116,7 +116,7 @@ export default function Login() {
             Per match
           </p>
           {[
-            ['Exact score', '+6 pts'],
+            ['Correct score', '+6 pts'],
             ['Correct result (W/D/L)', '+2 pts'],
             ['First goalscorer', '+3 pts'],
           ].map(([label, pts]) => (

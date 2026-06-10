@@ -7,6 +7,7 @@ import Tournament from './pages/Tournament';
 import Leaderboard from './pages/Leaderboard';
 import Admin from './pages/Admin';
 import FAQ from './pages/FAQ';
+import Leagues from './pages/Leagues';
 
 const IconFixtures = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -31,13 +32,21 @@ const IconMore = () => (
   </svg>
 );
 
+const IconLeagues = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+
 const TABS = [
   { id: 'fixtures', label: 'Predict', Icon: IconFixtures },
   { id: 'tournament', label: 'Tournament', Icon: IconTrophy },
   { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
+  { id: 'leagues', label: 'Leagues', Icon: IconLeagues },
 ];
-const TAB_ORDER = ['fixtures', 'tournament', 'leaderboard'];
-const TAB_LABELS = { fixtures: 'Predict', tournament: 'Tournament', leaderboard: 'Standings' };
+const TAB_ORDER = ['fixtures', 'tournament', 'leaderboard', 'leagues'];
+const TAB_LABELS = { fixtures: 'Predict', tournament: 'Tournament', leaderboard: 'Standings', leagues: 'Leagues' };
 
 function MoreMenu({ onAdmin, onFAQ, onClose }) {
   return (
@@ -165,6 +174,7 @@ function AppInner() {
         {tab === 'fixtures' && <Fixtures />}
         {tab === 'tournament' && <Tournament />}
         {tab === 'leaderboard' && <Leaderboard />}
+        {tab === 'leagues' && <Leagues />}
       </div>
 
       {/* More menu overlay */}
