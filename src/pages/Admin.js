@@ -545,8 +545,9 @@ export default function Admin({ onBack }) {
                 <div key={player.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderBottom: idx < players.length - 1 ? '1px solid var(--border)' : undefined }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: 13 }}>{player.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                      {player.createdAt ? new Date(player.createdAt.seconds * 1000).toLocaleDateString('en-GB') : 'unknown'}
+                    <div style={{ fontSize: 11, color: 'var(--text-3)', display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
+                      <span>{player.createdAt ? new Date(player.createdAt.seconds * 1000).toLocaleDateString('en-GB') : 'unknown'}</span>
+                      {showPins && <span style={{ color: 'var(--amber)', fontWeight: 700, letterSpacing: '0.1em', background: 'rgba(255,168,0,0.1)', padding: '1px 6px', borderRadius: 4 }}>PIN: {player.pin}</span>}
                     </div>
                   </div>
                   <button className="btn btn-sm" style={{ background: 'rgba(255,68,68,0.1)', color: 'var(--red)', border: '1px solid rgba(255,68,68,0.2)', fontSize: 11 }}

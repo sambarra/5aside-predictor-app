@@ -16,6 +16,10 @@ const FAQS = [
     a: 'Yes — you can predict all 72 group stage matches in one go before the tournament starts. Each prediction locks individually 5 minutes before that match kicks off, so you can still predict later matches even after earlier ones have started.',
   },
   {
+    q: 'What is the Booster?',
+    a: "Each player gets one Booster per round (group stage, Round of 32, Round of 16, etc.). Apply it to any match before predictions lock — it doubles ALL your points for that match (correct score, GD bonus, correct result, and first goalscorer). A perfect match in the Final with a booster could be worth over 70 points. You can move your booster to a different match right up until 5 minutes before kick-off. Once that match locks, it stays. Use it wisely — it could be your comeback card.",
+  },
+  {
     q: 'What is the Goal Difference (GD) bonus?',
     a: "If your predicted goal difference matches the actual goal difference — but you didn't get the exact score — you earn a GD bonus. Example: result is 3-2 (GD +1) and you predicted 1-0 (also GD +1) — bonus awarded. It does not apply if you already got the correct score. Escalates each round: +1pt in group stage, up to +6pts in the Final.",
   },

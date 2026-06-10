@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { getSquadOrdered } from '../data/squads';
 import { SCORING } from '../data/fixtures';
 
-export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
+export default function MatchCard({ fixture, prediction, onSave, isLocked, boosterApplied, onApplyBooster, onRemoveBooster, boosterAvailable }) {
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? '');
   const [awayScore, setAwayScore] = useState(prediction?.awayScore ?? '');
   const [scorer, setScorer] = useState(prediction?.firstGoalscorer ?? '');
@@ -58,7 +58,8 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
     else if (correctResult) pts += SCORING.CORRECT_RESULT;
     if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
     if (fixture.result.firstGoalscorer && prediction.firstGoalscorer === fixture.result.firstGoalscorer) pts += SCORING.FIRST_GOALSCORER;
-    return { pts, correctScore, correctResult, correctGD };
+    const finalPts = boosterApplied ? pts * 2 : pts;
+    return { pts: finalPts, rawPts: pts, correctScore, correctResult, correctGD, boosted: boosterApplied && pts > 0 };
   }
 
   const pointsData = getPoints();
@@ -67,7 +68,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
   function StatusBadge() {
     if (hasResult) {
       if (!hasPrediction) return <span className="badge badge-gray">No prediction</span>;
-      if (pointsData?.pts > 0) return <span className="badge badge-green">+{pointsData.pts}pts</span>;
+      if (pointsData?.pts > 0) return <span className="badge badge-green">{pointsData.boosted ? '⚡' : ''}+{pointsData.pts}pts</span>;
       return <span className="badge badge-gray">0pts</span>;
     }
     if (kickedOff) return <span className="badge badge-gray">🔴 In progress</span>;
@@ -232,6 +233,30 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
             >
               {saveButtonLabel()}
             </button>
+
+            {/* Booster button */}
+            {(boosterApplied || boosterAvailable) && (
+              <button
+                className={`btn btn-full btn-sm ${boosterApplied ? 'btn-booster-active' : 'btn-ghost'}`}
+                onClick={() => boosterApplied ? onRemoveBooster() : onApplyBooster(fixture.id)}
+                style={{
+                  marginTop: 8,
+                  background: boosterApplied ? 'rgba(255,200,0,0.15)' : undefined,
+                  border: boosterApplied ? '1px solid rgba(255,200,0,0.4)' : undefined,
+                  color: boosterApplied ? '#FFD700' : 'var(--text-3)',
+                  fontSize: 12,
+                }}
+              >
+                {boosterApplied ? '⚡ Booster applied — tap to remove' : '⚡ Use booster on this match (2× points)'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Show booster badge on locked/completed matches */}
+        {boosterApplied && (locked || hasResult) && (
+          <div style={{ marginTop: 8, fontSize: 11, color: '#FFD700', display: 'flex', alignItems: 'center', gap: 4 }}>
+            ⚡ Booster applied — all points doubled
           </div>
         )}
       </div>

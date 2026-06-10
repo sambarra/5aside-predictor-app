@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs, setDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
+import { getBoosterForStage, applyBooster, removeBooster } from './Booster';
 import { STAGES } from '../data/knockoutFixtures';
 import { GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 import MatchCard from '../components/MatchCard';
@@ -134,11 +135,13 @@ export default function Fixtures() {
         borderRadius: 'var(--radius-sm)', alignItems: 'center',
       }}>
         <span style={{ fontSize: 16 }}>🏟️</span>
-        <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5 }}>
-          <strong style={{ color: 'var(--green)', fontSize: 12 }}>Group Stage scoring: </strong>
+        <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.7 }}>
+          <strong style={{ color: 'var(--green)', fontSize: 12 }}>Group Stage: </strong>
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsExact}pts</span> correct score ·{' '}
+          <span style={{ color: 'var(--amber)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> GD bonus ·{' '}
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsResult}pts</span> correct result ·{' '}
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> first goalscorer
+          <br/><span style={{ color: 'var(--text-3)', fontSize: 11 }}>GD bonus: same GD as result but not exact · ⚡ You have 1 booster this round — doubles all points on one match</span>
         </div>
       </div>
 
