@@ -3,7 +3,15 @@
   "crons": [
     {
       "path": "/api/cron-fetch-results",
-      "schedule": "0 * * * *"
+{
+        "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+        "crons": [
+              {
+                      "path": "/api/cron-fetch-results",
+                      "schedule": "0 23 * * *"
+              }
+        ]
+    }"schedule": "0 * * * *"
     }
   ]
 }
