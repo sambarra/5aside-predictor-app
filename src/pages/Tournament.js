@@ -137,7 +137,7 @@ export default function TournamentPredictions() {
       if (snap.exists()) {
         setPicks(snap.data());
         setSaved(true);
-      setDirty(false);
+        setDirty(false);
       }
     } finally {
       setLoading(false);
@@ -240,7 +240,7 @@ export default function TournamentPredictions() {
             onClick={handleSave}
             disabled={!allFilled || saving}
           >
-            {saving ? 'Saving...' : saved && !dirty ? '✓ Picks saved — tap to edit' : dirty ? '💾 Save changes' : '🔒 Lock in my picks'}
+            {saving ? 'Saving...' : saved && !dirty ? '✓ Tournament picks saved' : dirty && saved ? '💾 Update my picks' : '🔒 Save my picks'}
           </button>
           {!allFilled && (
             <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>

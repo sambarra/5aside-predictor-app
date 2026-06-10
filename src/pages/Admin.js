@@ -398,19 +398,22 @@ export default function Admin({ onBack }) {
   if (!authed) {
     return (
       <div className="page" style={{ maxWidth: 400 }}>
-        <h1 className="page-title">Admin</h1>
+        <h1 className="page-title">⚙️ Admin</h1>
         <p className="page-sub">Enter your PIN to continue</p>
-        <div style={{ display: 'flex', gap: 10 }}>
-          <input className="input" type="password" placeholder="Admin PIN"
+        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+          <input className="input" type="password" placeholder="Enter PIN"
             value={pinInput} onChange={e => setPinInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleLogin()} />
+            onKeyDown={e => e.key === 'Enter' && handleLogin()}
+            style={{ fontSize: 16, letterSpacing: '0.2em' }} />
           <button className="btn btn-primary" onClick={handleLogin}>Enter</button>
         </div>
-        {pinError && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{pinError}</p>}
-        <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 16, lineHeight: 1.6 }}>
-          Use your <strong style={{ color: 'var(--text-2)' }}>player PIN</strong> if you've been added as an admin.<br/>
-          Or use the <strong style={{ color: 'var(--text-2)' }}>master PIN</strong> for full access.
-        </p>
+        {pinError && <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 8 }}>{pinError}</p>}
+        <div className="card" style={{ padding: '12px 14px' }}>
+          <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.7, marginBottom: 0 }}>
+            <strong style={{ color: 'var(--text)' }}>League admins</strong> — use your player PIN (after being added in Admin → Admins)<br/>
+            <strong style={{ color: 'var(--text)' }}>Super admin</strong> — use the master PIN for full access
+          </p>
+        </div>
       </div>
     );
   }
