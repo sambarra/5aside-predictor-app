@@ -51,6 +51,16 @@ export default function Fixtures() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
+  async function handleApplyBooster(fixtureId) {
+    await applyBooster(user.id, 'group', fixtureId);
+    setGroupBooster(fixtureId);
+  }
+
+  async function handleRemoveBooster() {
+    await removeBooster(user.id, 'group');
+    setGroupBooster(null);
+  }
+
   async function savePrediction(fixtureId, data) {
     const id = `${user.id}_${fixtureId}`;
     await setDoc(doc(db, 'predictions', id), {
@@ -130,19 +140,19 @@ export default function Fixtures() {
 
       {/* Current round scoring banner */}
       <div style={{
-        display: 'flex', gap: 12, marginBottom: 16, padding: '10px 14px',
+        marginBottom: 16, padding: '10px 14px',
         background: 'rgba(0,255,106,0.05)', border: '1px solid rgba(0,255,106,0.15)',
-        borderRadius: 'var(--radius-sm)', alignItems: 'center',
+        borderRadius: 'var(--radius-sm)',
       }}>
-        <span style={{ fontSize: 16 }}>🏟️</span>
         <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.8 }}>
-          <span style={{ color: 'var(--text)' }}>Group Stage: </span>
+          <span style={{ color: 'var(--text)', fontWeight: 600 }}>Group Stage: </span>
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsExact}pts</span> score ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> GD bonus ·{' '}
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsResult}pts</span> result ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> 1st scorer ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> GD bonus
-          <br/>
-          <span style={{ color: 'var(--text-3)', fontSize: 11 }}>⚡ 1 booster available each round (doubles all points on one match)</span>
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> 1st scorer
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>
+          ⚡ 1 booster available each round (doubles points on 1 match)
         </div>
       </div>
 
@@ -173,6 +183,10 @@ export default function Fixtures() {
                 prediction={predictions[fixture.id]}
                 onSave={savePrediction}
                 isLocked={new Date(new Date(fixture.kickoff).getTime() - 5 * 60 * 1000) <= now}
+                boosterApplied={groupBooster === fixture.id}
+                boosterAvailable={!groupBooster || groupBooster === fixture.id}
+                onApplyBooster={handleApplyBooster}
+                onRemoveBooster={handleRemoveBooster}
               />
             ))}
           </div>

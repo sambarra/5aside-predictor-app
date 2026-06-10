@@ -9,6 +9,86 @@ import { STAGES, R32_BRACKET, KNOCKOUT_TEMPLATE } from '../data/knockoutFixtures
 
 const HARDCODED_SUPER_ADMIN = 'WC2026admin';
 
+// Searchable team picker for tournament results
+function TeamSearch({ value, onChange, placeholder }) {
+  const [query, setQuery] = useState(value || '');
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const teams = Object.keys(SQUADS_MAP);
+  const filtered = query.length > 0
+    ? teams.filter(t => t.toLowerCase().includes(query.toLowerCase())).slice(0, 10)
+    : [];
+  useEffect(() => {
+    function handleClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+  useEffect(() => { if (value) setQuery(value); }, [value]);
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <input className="input" placeholder={placeholder} value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true); if (!e.target.value) onChange(''); }}
+        onFocus={() => setOpen(true)} autoComplete="off" />
+      {open && filtered.length > 0 && (
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8,
+          marginTop: 4, maxHeight: 200, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+          {filtered.map(t => (
+            <div key={t} onMouseDown={() => { onChange(t); setQuery(t); setOpen(false); }}
+              style={{ padding: '9px 14px', cursor: 'pointer', fontSize: 14,
+                borderBottom: '1px solid var(--border)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = ''}>
+              {t}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Searchable player picker for golden boot
+function PlayerSearchAdmin({ value, onChange }) {
+  const [query, setQuery] = useState(value ? value.replace(/ \([^)]+\)$/, '') : '');
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const allPlayers = Object.entries(SQUADS_MAP).flatMap(([team, players]) =>
+    players.map(p => ({ name: p.name || p, team, value: `${p.name || p} (${team})` }))
+  );
+  const filtered = query.length > 1
+    ? allPlayers.filter(p => p.name.toLowerCase().includes(query.toLowerCase()) || p.team.toLowerCase().includes(query.toLowerCase())).slice(0, 15)
+    : [];
+  useEffect(() => {
+    function handleClick(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <input className="input" placeholder="Type player name or country..." value={query}
+        onChange={e => { setQuery(e.target.value); setOpen(true); if (!e.target.value) onChange(''); }}
+        onFocus={() => query.length > 1 && setOpen(true)} autoComplete="off" />
+      {open && filtered.length > 0 && (
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 8,
+          marginTop: 4, maxHeight: 220, overflowY: 'auto', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
+          {filtered.map(p => (
+            <div key={p.value} onMouseDown={() => { onChange(p.value); setQuery(p.name); setOpen(false); }}
+              style={{ padding: '8px 14px', cursor: 'pointer', display: 'flex',
+                justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+              onMouseLeave={e => e.currentTarget.style.background = ''}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{p.name}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{p.team}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Tournament Result Tab - admin enters final outcomes to award bonus points
 function TournamentResultTab({ db }) {
   const [form, setForm] = useState({ winner: '', runner_up: '', third: '', golden_boot: '' });
@@ -18,10 +98,7 @@ function TournamentResultTab({ db }) {
 
   useEffect(() => {
     getDocs(collection(db, 'tournamentResults')).then(snap => {
-      if (!snap.empty) {
-        setForm(snap.docs[0].data());
-        setSaved(true);
-      }
+      if (!snap.empty) { setForm(snap.docs[0].data()); setSaved(true); }
     });
   }, [db]);
 
@@ -29,11 +106,9 @@ function TournamentResultTab({ db }) {
     if (!form.winner || !form.golden_boot) return;
     setSaving(true);
     try {
-      await setDoc(doc(db, 'tournamentResults', 'final'), {
-        ...form, updatedAt: new Date().toISOString(),
-      });
+      await setDoc(doc(db, 'tournamentResults', 'final'), { ...form, updatedAt: new Date().toISOString() });
       setSaved(true);
-      setMsg('✓ Tournament results saved — standings will now include bonus points');
+      setMsg('✓ Saved — standings now include tournament bonus points');
     } catch (err) {
       setMsg('❌ Error: ' + err.message);
     } finally {
@@ -49,36 +124,30 @@ function TournamentResultTab({ db }) {
       {msg && <div style={{ padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 8, marginBottom: 14, fontSize: 13, color: msg.startsWith('✓') ? 'var(--green)' : 'var(--red)' }}>{msg}</div>}
       <div className="card" style={{ padding: '16px' }}>
         {[
-          { key: 'winner', label: '🏆 Tournament Winner', pts: '+30pts' },
-          { key: 'runner_up', label: '🥈 Runner-up', pts: '+20pts' },
-          { key: 'third', label: '🥉 Third Place', pts: '+10pts' },
-          { key: 'golden_boot', label: '⚽ Golden Boot', pts: '+20pts' },
-        ].map(({ key, label, pts }) => (
-          <div key={key} style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 11, color: 'var(--text-2)', display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span>{label}</span>
-              <span style={{ color: 'var(--green)', fontWeight: 700 }}>{pts}</span>
+          { key: 'winner', label: '🏆 Tournament Winner', pts: '+30pts', type: 'team' },
+          { key: 'runner_up', label: '🥈 Runner-up', pts: '+20pts', type: 'team' },
+          { key: 'third', label: '🥉 Third Place', pts: '+10pts', type: 'team' },
+          { key: 'golden_boot', label: '⚽ Golden Boot scorer', pts: '+20pts', type: 'player' },
+        ].map(({ key, label, pts, type }) => (
+          <div key={key} style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 11, color: 'var(--text-2)', display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+              <span>{label}</span><span style={{ color: 'var(--green)', fontWeight: 700 }}>{pts}</span>
             </label>
-            <input
-              className="input"
-              placeholder={key === 'golden_boot' ? 'e.g. Kylian Mbappe (France)' : 'e.g. France'}
-              value={form[key] || ''}
-              onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
-            />
+            {type === 'team'
+              ? <TeamSearch value={form[key] || ''} onChange={v => setForm(p => ({ ...p, [key]: v }))} placeholder="Search team..." />
+              : <PlayerSearchAdmin value={form[key] || ''} onChange={v => setForm(p => ({ ...p, [key]: v }))} />
+            }
           </div>
         ))}
         <button
-          className={`btn btn-primary btn-full ${!form.winner || !form.golden_boot ? 'btn-ghost' : ''}`}
+          className={`btn btn-primary btn-full`}
           onClick={saveTournamentResult}
           disabled={saving || !form.winner || !form.golden_boot}
-          style={{ marginTop: 4 }}
+          style={{ marginTop: 4, opacity: (!form.winner || !form.golden_boot) ? 0.5 : 1 }}
         >
           {saving ? 'Saving...' : saved ? '✓ Update tournament results' : '🎖️ Save tournament results'}
         </button>
       </div>
-      <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 12, lineHeight: 1.6 }}>
-        Once saved, the standings will automatically show updated totals including tournament bonus points for all players.
-      </p>
     </div>
   );
 }
