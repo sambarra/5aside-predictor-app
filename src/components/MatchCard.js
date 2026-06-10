@@ -11,7 +11,8 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
 
   const kickoff = new Date(fixture.kickoff);
   const now = new Date();
-  const locked = isLocked || now >= kickoff;
+  const lockTime = new Date(kickoff.getTime() - 5 * 60 * 1000);
+  const locked = isLocked || now >= lockTime;
   const hasFullPrediction = homeScore !== '' && awayScore !== '' && scorer;
 
   const dateStr = kickoff.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });

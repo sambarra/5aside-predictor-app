@@ -42,8 +42,8 @@ function FormStrip({ form }) {
   if (!form?.length) return null;
   const last5 = form.slice(-5);
   const colors = { E: 'var(--green)', R: 'var(--amber)', W: 'var(--red)', '-': 'var(--surface-3)' };
-  const labels = { E: 'E', R: 'R', W: '✗', '-': '-' };
-  const titles = { E: 'Correct score', R: 'Correct result', W: 'Wrong', '-': 'No prediction' };
+  const labels = { E: 'S', R: 'R', W: '✗', '-': '-' };
+  const titles = { E: 'Correct score (S)', R: 'Correct result (R)', W: 'Wrong', '-': 'No prediction' };
   return (
     <div style={{ display: 'flex', gap: 3 }}>
       {last5.map((f, i) => (
@@ -165,7 +165,7 @@ export default function Leaderboard() {
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
-          {['#', 'Player', 'Pts', '✓', 'Form'].map((h, i) => (
+          {['#', 'Player', 'Pts', 'S', 'Form'].map((h, i) => (
             <span key={h} style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: i > 1 ? 'center' : 'left' }}>{h}</span>
           ))}
         </div>
@@ -194,7 +194,7 @@ export default function Leaderboard() {
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 6 }}>you</span>}
                   <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 1 }}>
-                    {player.correctScores} correct · {player.scorerPts > 0 ? `+${player.scorerPts}⚽` : ''}
+                    {player.correctScores}S · {player.correctResults}R{player.scorerPts > 0 ? ` · ⚽${player.scorerPts}pts` : ''}
                   </div>
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
@@ -277,11 +277,14 @@ export default function Leaderboard() {
       {/* Table */}
       {renderTable(displayPlayers)}
 
-      {/* Form key */}
+      {/* Tap hint + form key */}
       <div className="card" style={{ marginTop: 16, padding: '12px 16px' }}>
-        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key</p>
+        <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10 }}>
+          💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their points progression graph and match-by-match stats
+        </p>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key · <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>last 5 matches</span></p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12 }}>
-          {[['E', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['✗', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
+          {[['S', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['✗', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 20, height: 20, borderRadius: 4, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color, flexShrink: 0 }}>{label}</div>
               <span style={{ color: 'var(--text-2)' }}>{desc}</span>
@@ -289,14 +292,7 @@ export default function Leaderboard() {
           ))}
         </div>
 
-        <div style={{ marginTop: 12, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
-          <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Scoring</p>
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-2)' }}>
-            <span>Correct score <strong style={{ color: 'var(--green)' }}>+{SCORING.EXACT_SCORE}pts</strong></span>
-            <span>Correct result <strong style={{ color: 'var(--green)' }}>+{SCORING.CORRECT_RESULT}pts</strong></span>
-            <span>First goalscorer <strong style={{ color: 'var(--green)' }}>+{SCORING.FIRST_GOALSCORER}pts</strong></span>
-          </div>
-        </div>
+
       </div>
     </div>
   );

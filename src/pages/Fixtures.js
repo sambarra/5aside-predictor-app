@@ -167,7 +167,7 @@ export default function Fixtures() {
                 fixture={fixture}
                 prediction={predictions[fixture.id]}
                 onSave={savePrediction}
-                isLocked={new Date(fixture.kickoff) <= now}
+                isLocked={new Date(new Date(fixture.kickoff).getTime() - 5 * 60 * 1000) <= now}
               />
             ))}
           </div>

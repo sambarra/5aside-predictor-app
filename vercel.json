@@ -1,9 +1,9 @@
 {
-      "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-      "crons": [
-              {
-                        "path": "/api/cron-fetch-results",
-                        "schedule": "0 23 * * *"
-              }
-      ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+  "crons": [
+    {
+      "path": "/api/cron-fetch-results",
+      "schedule": "0 23 * * *"
+    }
+  ]
 }

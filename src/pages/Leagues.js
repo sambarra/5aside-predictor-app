@@ -115,31 +115,58 @@ export default function Leagues() {
 
   if (view === 'created') {
     const code = window._newLeagueCode;
+    const leagueName = myLeagues.find(l => l.code === code)?.name || 'My League';
+    const shareText = `🏆 Join my World Cup predictor league on 5aside.com!\n\nLeague: ${leagueName}\nCode: ${code}\n\nJoin here 👉 https://predictor.5aside.com\n\nEnter the code when you sign in. Predict every match score, earn points, and see who knows football best!`;
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
     return (
       <div className="page">
         <h1 className="page-title">🎉 League Created!</h1>
-        <div className="card card-green-border" style={{ textAlign: 'center', padding: '28px 20px' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 12 }}>Share this code with your mates</p>
+        <div className="card card-green-border" style={{ textAlign: 'center', padding: '24px 20px', marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10 }}>Your league code</p>
           <div style={{
-            fontSize: 42, fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.15em',
+            fontSize: 48, fontFamily: 'Bebas Neue, sans-serif', letterSpacing: '0.2em',
             color: 'var(--green)', background: 'var(--surface-2)', borderRadius: 12,
-            padding: '16px 24px', margin: '0 auto 16px', display: 'inline-block',
+            padding: '14px 28px', display: 'inline-block', marginBottom: 10,
           }}>
             {code}
           </div>
-          <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 20 }}>
-            Anyone can join at predictor.5aside.com with this code
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 16 }}>
+            Share this with your mates so they can join
           </p>
-          <button className="btn btn-primary btn-full" onClick={() => {
-            navigator.clipboard?.writeText(code);
-            setMsg('✓ Code copied!');
+
+          {/* WhatsApp share */}
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary btn-full btn-lg"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 10, textDecoration: 'none' }}
+          >
+            <span style={{ fontSize: 18 }}>💬</span>
+            Share on WhatsApp
+          </a>
+
+          <button className="btn btn-outline btn-full" onClick={() => {
+            navigator.clipboard?.writeText(shareText);
+            setMsg('✓ Message copied to clipboard!');
           }}>
-            Copy Code
+            📋 Copy invite message
           </button>
+
           {msg && <p style={{ color: 'var(--green)', fontSize: 13, marginTop: 10 }}>{msg}</p>}
         </div>
-        <button className="btn btn-ghost btn-full" style={{ marginTop: 12 }} onClick={() => { setView('list'); setMsg(''); }}>
-          Back to My Leagues
+
+        {/* Preview of share message */}
+        <div className="card" style={{ marginBottom: 12, padding: '12px 16px' }}>
+          <p style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, fontWeight: 600 }}>Preview message</p>
+          <pre style={{ fontSize: 12, color: 'var(--text-2)', whiteSpace: 'pre-wrap', lineHeight: 1.6, fontFamily: 'inherit' }}>
+            {shareText}
+          </pre>
+        </div>
+
+        <button className="btn btn-ghost btn-full" onClick={() => { setView('list'); setMsg(''); }}>
+          ← Back to My Leagues
         </button>
       </div>
     );
@@ -249,13 +276,24 @@ export default function Leagues() {
                       ))}
                     </div>
                   </div>
-                  <button
-                    className="btn btn-ghost btn-full btn-sm"
-                    style={{ marginTop: 12, fontSize: 12 }}
-                    onClick={() => { navigator.clipboard?.writeText(league.code); }}
-                  >
-                    📋 Copy invite code: {league.code}
-                  </button>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(`🏆 Join my World Cup predictor league!\nLeague: ${league.name}\nCode: ${league.code}\n\nJoin at 👉 https://predictor.5aside.com`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline btn-sm"
+                      style={{ flex: 1, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                    >
+                      💬 Share
+                    </a>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      style={{ flex: 1 }}
+                      onClick={() => { navigator.clipboard?.writeText(league.code); }}
+                    >
+                      📋 Copy code
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

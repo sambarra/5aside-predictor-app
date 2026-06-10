@@ -161,7 +161,7 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
 .divider-green { background: var(--border-green); }
 
 /* Page layout */
-.page { padding: 20px 16px 100px; max-width: 600px; margin: 0 auto; }
+.page { padding: 20px 16px calc(80px + env(safe-area-inset-bottom, 0px)); max-width: 600px; margin: 0 auto; }
 .page-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 32px;
@@ -176,12 +176,15 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(20,20,20,0.95);
+  background: rgba(14,14,14,0.97);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-top: 1px solid var(--border);
   display: flex;
-  z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Prevent Chrome mobile toolbar overlap */
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
 }
 .tab-nav-item {
   flex: 1;

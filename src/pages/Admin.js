@@ -8,7 +8,7 @@ import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
 
 const HARDCODED_SUPER_ADMIN = 'WC2026admin';
 
-export default function Admin() {
+export default function Admin({ onBack }) {
   const [authed, setAuthed] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');

@@ -1,4 +1,4 @@
-// build-20260609 
+// build-20260610
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import Login from './pages/Login';
@@ -26,16 +26,15 @@ const IconLeaderboard = () => (
     <path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>
   </svg>
 );
-const IconMore = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
-  </svg>
-);
-
 const IconLeagues = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+  </svg>
+);
+const IconMore = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/>
   </svg>
 );
 
@@ -45,15 +44,11 @@ const TABS = [
   { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
   { id: 'leagues', label: 'Leagues', Icon: IconLeagues },
 ];
-const TAB_ORDER = ['fixtures', 'tournament', 'leaderboard', 'leagues'];
-const TAB_LABELS = { fixtures: 'Predict', tournament: 'Tournament', leaderboard: 'Standings', leagues: 'Leagues' };
 
 function MoreMenu({ onAdmin, onFAQ, onClose }) {
   return (
     <>
-      <div onClick={onClose} style={{
-        position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)',
-      }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
       <div style={{
         position: 'fixed', bottom: 72, right: 16, zIndex: 201,
         background: 'var(--surface-2)', border: '1px solid var(--border)',
@@ -67,18 +62,40 @@ function MoreMenu({ onAdmin, onFAQ, onClose }) {
           <button key={item.label} onClick={item.action} style={{
             display: 'flex', alignItems: 'center', gap: 12, width: '100%',
             padding: '14px 18px', background: 'none', border: 'none',
-            color: 'var(--text)', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-            borderBottom: '1px solid var(--border)', textAlign: 'left',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-3)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}
-          >
+            borderBottom: '1px solid var(--border)',
+            color: 'var(--text)', fontSize: 14, fontWeight: 600, cursor: 'pointer', textAlign: 'left',
+          }}>
             <span style={{ fontSize: 16 }}>{item.icon}</span>
             {item.label}
           </button>
         ))}
       </div>
     </>
+  );
+}
+
+// Bottom nav always visible — shared across all views
+function BottomNav({ tab, setTab, showMore, setShowMore }) {
+  return (
+    <nav className="tab-nav">
+      {TABS.map(({ id, label, Icon }) => (
+        <button
+          key={id}
+          className={`tab-nav-item ${tab === id ? 'active' : ''}`}
+          onClick={() => setTab(id)}
+        >
+          <Icon />
+          {label}
+        </button>
+      ))}
+      <button
+        className={`tab-nav-item ${showMore ? 'active' : ''}`}
+        onClick={() => setShowMore(m => !m)}
+      >
+        <IconMore />
+        More
+      </button>
+    </nav>
   );
 }
 
@@ -97,77 +114,58 @@ function AppInner() {
 
   if (!user) return <Login />;
 
+  // Top bar — always the same
+  const TopBar = () => (
+    <div className="top-bar">
+      <img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          {user.name}
+        </span>
+        <button
+          className="btn btn-ghost btn-sm"
+          style={{ padding: '6px 10px', fontSize: 12 }}
+          onClick={() => { if (window.confirm('Log out?')) logout(); }}
+        >
+          Log out
+        </button>
+      </div>
+    </div>
+  );
+
   if (showAdmin) return (
     <div>
-      <div style={{ padding: '14px 16px 0', maxWidth: 600, margin: '0 auto' }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => setShowAdmin(false)}>← Back</button>
-      </div>
-      <Admin />
+      <TopBar />
+      <Admin onBack={() => setShowAdmin(false)} />
+      {showMore && (
+        <MoreMenu
+          onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
+          onFAQ={() => { setShowMore(false); setShowFAQ(true); }}
+          onClose={() => setShowMore(false)}
+        />
+      )}
+      <BottomNav tab={tab} setTab={(t) => { setShowAdmin(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
     </div>
   );
 
   if (showFAQ) return (
     <div>
-      <div style={{ padding: '14px 16px 0', maxWidth: 600, margin: '0 auto' }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => setShowFAQ(false)}>← Back</button>
-      </div>
-      <FAQ />
+      <TopBar />
+      <FAQ onBack={() => setShowFAQ(false)} />
+      {showMore && (
+        <MoreMenu
+          onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
+          onFAQ={() => { setShowMore(false); }}
+          onClose={() => setShowMore(false)}
+        />
+      )}
+      <BottomNav tab={tab} setTab={(t) => { setShowFAQ(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
     </div>
   );
 
-  const currentIdx = TAB_ORDER.indexOf(tab);
-  const prevTab = currentIdx > 0 ? TAB_ORDER[currentIdx - 1] : null;
-  const nextTab = currentIdx < TAB_ORDER.length - 1 ? TAB_ORDER[currentIdx + 1] : null;
-
   return (
     <div>
-      {/* Top bar */}
-      <div className="top-bar">
-        <img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            {user.name}
-          </span>
-          <button
-            className="btn btn-ghost btn-sm"
-            style={{ padding: '6px 10px', fontSize: 12 }}
-            onClick={() => { if (window.confirm('Log out?')) logout(); }}
-          >
-            Log out
-          </button>
-        </div>
-      </div>
-
-      {/* Prev / Next nav strip — always 3 equal columns so centre is always centred */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr auto 1fr',
-        alignItems: 'center', padding: '6px 16px', maxWidth: 600,
-        margin: '6px auto 0', borderBottom: '1px solid var(--border)',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => prevTab && setTab(prevTab)}
-            disabled={!prevTab}
-            style={{ opacity: prevTab ? 1 : 0, fontSize: 12, padding: '5px 10px', pointerEvents: prevTab ? 'auto' : 'none' }}
-          >
-            ← {prevTab ? TAB_LABELS[prevTab] : ''}
-          </button>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          {TAB_LABELS[tab]}
-        </span>
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={() => nextTab && setTab(nextTab)}
-            disabled={!nextTab}
-            style={{ opacity: nextTab ? 1 : 0, fontSize: 12, padding: '5px 10px', pointerEvents: nextTab ? 'auto' : 'none' }}
-          >
-            {nextTab ? TAB_LABELS[nextTab] : ''} →
-          </button>
-        </div>
-      </div>
+      <TopBar />
 
       {/* Page content */}
       <div style={{ paddingTop: 4 }}>
@@ -177,7 +175,6 @@ function AppInner() {
         {tab === 'leagues' && <Leagues />}
       </div>
 
-      {/* More menu overlay */}
       {showMore && (
         <MoreMenu
           onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
@@ -186,26 +183,7 @@ function AppInner() {
         />
       )}
 
-      {/* Bottom tab nav — 4 items evenly spaced */}
-      <nav className="tab-nav">
-        {TABS.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            className={`tab-nav-item ${tab === id ? 'active' : ''}`}
-            onClick={() => setTab(id)}
-          >
-            <Icon />
-            {label}
-          </button>
-        ))}
-        <button
-          className={`tab-nav-item ${showMore ? 'active' : ''}`}
-          onClick={() => setShowMore(m => !m)}
-        >
-          <IconMore />
-          More
-        </button>
-      </nav>
+      <BottomNav tab={tab} setTab={setTab} showMore={showMore} setShowMore={setShowMore} />
     </div>
   );
 }

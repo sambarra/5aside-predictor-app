@@ -8,7 +8,7 @@ import { SQUADS } from '../data/squads';
 
 // Golden boot players now come from SQUADS data
 
-const DEADLINE = new Date('2026-06-11T18:00:00+01:00'); // 2hrs before first match
+const DEADLINE = new Date('2026-06-11T19:55:00+01:00'); // 5 mins before first match 20:00 BST
 
 // Searchable player picker for Golden Boot
 function PlayerSearch({ value, onChange, disabled }) {
@@ -190,24 +190,6 @@ export default function TournamentPredictions() {
         </div>
       )}
 
-      {/* Points summary */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-          Bonus points on offer
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {TOURNAMENT_PREDICTIONS_CONFIG.map(c => (
-            <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>{c.icon}</span>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{c.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)' }}>+{c.points}pts</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Pick fields */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {TOURNAMENT_PREDICTIONS_CONFIG.map(config => (
@@ -242,6 +224,24 @@ export default function TournamentPredictions() {
             )}
           </div>
         ))}
+      </div>
+
+      {/* Bonus points summary - at bottom */}
+      <div className="card" style={{ marginTop: 4, marginBottom: 16 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+          Bonus points on offer
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {TOURNAMENT_PREDICTIONS_CONFIG.map(cfg => (
+            <div key={cfg.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 18 }}>{cfg.icon}</span>
+              <div>
+                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{cfg.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)' }}>+{cfg.points}pts</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Save button */}

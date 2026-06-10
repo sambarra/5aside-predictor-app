@@ -1,4 +1,4 @@
-// build-20260609 
+// build-20260609
 import React, { useState } from 'react';
 import { STAGES, GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 
@@ -46,7 +46,7 @@ const SCORING_TABLE = [
   ...Object.entries(STAGES).map(([, s]) => ({ stage: s.label, exact: s.pointsExact, result: s.pointsResult, scorer: s.pointsScorer })),
 ];
 
-export default function FAQ() {
+export default function FAQ({ onBack }) {
   const [open, setOpen] = useState(null);
 
   return (
