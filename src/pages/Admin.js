@@ -366,78 +366,8 @@ function KnockoutTab({ knockoutFixtures, selectedStage, setSelectedStage, adding
 }
 
 
-
-// Super admin: manage and delete leagues
-function LeaguesAdminTab({ db }) {
-  const [leagues, setLeagues] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [msg, setMsg] = useState('');
-
-  useEffect(() => {
-    (async () => {
-      const snap = await getDocs(collection(db, 'leagues'));
-      const list = [];
-      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-      list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-      setLeagues(list);
-      setLoading(false);
-    })();
-  }, [db]);
-
-  async function deleteLeague(leagueId, leagueName) {
-    if (!window.confirm('Delete league "' + leagueName + '"? This removes the league and all memberships. Player predictions are unaffected.')) return;
-    try {
-      await deleteDoc(doc(db, 'leagues', leagueId));
-      const membersSnap = await getDocs(query(collection(db, 'leagueMembers'), where('leagueId', '==', leagueId)));
-      for (const d of membersSnap.docs) await deleteDoc(d.ref);
-      setLeagues(prev => prev.filter(l => l.id !== leagueId));
-      setMsg('\u2713 "' + leagueName + '" deleted');
-      setTimeout(() => setMsg(''), 4000);
-    } catch (err) {
-      setMsg('\u274c Error: ' + err.message);
-    }
-  }
-
-  if (loading) return <p style={{ color: 'var(--text-2)', fontSize: 13, padding: '8px 0' }}>Loading leagues...</p>;
-
-  return (
-    <div>
-      <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 14 }}>
-        {leagues.length} mini league{leagues.length !== 1 ? 's' : ''} total
-      </p>
-      {msg && <div style={{ padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 8, marginBottom: 14, fontSize: 13, color: msg.startsWith('\u2713') ? 'var(--green)' : 'var(--red)' }}>{msg}</div>}
-      {leagues.length === 0 && <p style={{ color: 'var(--text-3)', fontSize: 13 }}>No leagues yet</p>}
-      <div className="card" style={{ padding: 0 }}>
-        {leagues.map((league, idx) => (
-          <div key={league.id} style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '11px 14px',
-            borderBottom: idx < leagues.length - 1 ? '1px solid var(--border)' : undefined,
-          }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{league.name}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
-                Code: <span style={{ color: 'var(--green)', fontWeight: 700 }}>{league.code}</span>
-                {league.createdBy && <span style={{ marginLeft: 8 }}>\u00b7 {league.createdBy}</span>}
-              </div>
-            </div>
-            <button
-              className="btn btn-sm"
-              style={{ background: 'rgba(255,68,68,0.1)', color: 'var(--red)', border: '1px solid rgba(255,68,68,0.2)', fontSize: 11 }}
-              onClick={() => deleteLeague(league.id, league.name)}
-            >
-              Delete
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function Admin({ onBack }) {
   const [authed, setAuthed] = useState(false);
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [activeTab, setActiveTab] = useState('results');
@@ -502,7 +432,7 @@ export default function Admin({ onBack }) {
   async function handleLogin() {
     setPinError('');
     // Super admin master PIN
-    if (pinInput === HARDCODED_SUPER_ADMIN) { setAuthed(true); setIsSuperAdmin(true); return; }
+    if (pinInput === HARDCODED_SUPER_ADMIN) { setAuthed(true); return; }
     // Check admins collection (PIN stored there)
     const adminsSnap = await getDocs(collection(db, 'admins'));
     for (const d of adminsSnap.docs) {
@@ -654,7 +584,7 @@ export default function Admin({ onBack }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins'], ['knockout', '🏆 Knockout'], ...(isSuperAdmin ? [['leagues_admin', '🏆 Leagues']] : [])].map(([t, label]) => (
+        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins'], ['knockout', '🏆 Knockout'], ['tournament_result', '🎖️ Final']].map(([t, label]) => (
           <button key={t} className={`btn btn-sm ${activeTab === t ? 'btn-primary' : 'btn-ghost'}`}
             onClick={() => setActiveTab(t)} style={{ flexShrink: 0 }}>{label}</button>
         ))}
@@ -790,10 +720,6 @@ export default function Admin({ onBack }) {
 
       {activeTab === 'tournament_result' && (
         <TournamentResultTab db={db} />
-      )}
-
-      {activeTab === 'leagues_admin' && isSuperAdmin && (
-        <LeaguesAdminTab db={db} />
       )}
 
       {activeTab === 'admins' && (

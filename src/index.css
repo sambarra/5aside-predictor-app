@@ -1,0 +1,458 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap');
+
+:root {
+  --green: #00FF6A;
+  --green-dim: #00cc55;
+  --black: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1e1e1e;
+  --surface-3: #282828;
+  --border: rgba(255,255,255,0.08);
+  --border-green: rgba(0,255,106,0.25);
+  --text: #ffffff;
+  --text-2: rgba(255,255,255,0.6);
+  --text-3: rgba(255,255,255,0.35);
+  --red: #FF4444;
+  --amber: #FFB020;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--black);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--black); }
+::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
+
+/* Utility */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--green);
+  color: #000;
+}
+.btn-primary:hover:not(:disabled) { background: #1aff7a; transform: translateY(-1px); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--green);
+  border: 1.5px solid var(--green);
+}
+.btn-outline:hover:not(:disabled) { background: rgba(0,255,106,0.08); }
+
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) { background: var(--surface-3); }
+
+.btn-lg { padding: 14px 28px; font-size: 15px; border-radius: var(--radius); }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-full { width: 100%; }
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.card-green-border { border-color: var(--border-green); }
+
+/* Input */
+.input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 10px 14px;
+  width: 100%;
+  transition: border-color 0.15s;
+  outline: none;
+}
+.input:focus { border-color: var(--green); }
+.input::placeholder { color: var(--text-3); }
+
+select.input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.badge-green { background: rgba(0,255,106,0.12); color: var(--green); border: 1px solid rgba(0,255,106,0.2); }
+.badge-amber { background: rgba(255,176,32,0.12); color: var(--amber); border: 1px solid rgba(255,176,32,0.2); }
+.badge-red { background: rgba(255,68,68,0.12); color: var(--red); border: 1px solid rgba(255,68,68,0.2); }
+.badge-gray { background: rgba(255,255,255,0.06); color: var(--text-2); border: 1px solid var(--border); }
+
+/* Score input pair */
+.score-pair {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.score-input {
+  width: 52px;
+  height: 52px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s;
+  -moz-appearance: textfield;
+}
+.score-input::-webkit-outer-spin-button,
+.score-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+.score-input:focus { border-color: var(--green); }
+.score-input.filled { border-color: rgba(0,255,106,0.4); }
+
+.score-dash {
+  color: var(--text-3);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 0; }
+.divider-green { background: var(--border-green); }
+
+/* Page layout */
+.page { padding: 20px 16px calc(80px + env(safe-area-inset-bottom, 0px)); max-width: 600px; margin: 0 auto; }
+.page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 32px;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.page-sub { color: var(--text-2); font-size: 14px; margin-bottom: 24px; }
+
+/* Tab nav */
+.tab-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(14,14,14,0.97);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  /* Prevent Chrome mobile toolbar overlap */
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+}
+.tab-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 0.15s;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.tab-nav-item svg { width: 22px; height: 22px; }
+.tab-nav-item.active { color: var(--green); }
+
+/* Top bar */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 0;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+.logo span { color: var(--green); }
+
+/* Match card */
+.match-card {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 14px;
+  transition: border-color 0.15s ease;
+}
+.match-card.completed { border-color: rgba(0,255,106,0.25); background: rgba(0,255,106,0.02); }
+.match-card.locked { opacity: 0.7; }
+.match-card:not(.locked):not(.completed) { border-color: rgba(255,255,255,0.12); }
+
+.match-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.match-meta { font-size: 11px; color: var(--text-2); }
+.match-meta strong { color: var(--text); }
+
+.match-body { padding: 14px; }
+
+.teams-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.team-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.team-name.away { text-align: right; }
+
+.match-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.field-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-width: 80px;
+}
+
+/* Result display */
+.result-correct { color: var(--green); }
+.result-partial { color: var(--amber); }
+.result-wrong { color: var(--red); }
+
+/* Leaderboard */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  color: var(--text-3);
+  min-width: 28px;
+}
+.lb-rank.top { color: var(--green); }
+.lb-name { flex: 1; font-weight: 600; font-size: 15px; }
+.lb-pts {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--green);
+}
+.lb-pts-label { font-size: 10px; color: var(--text-3); text-align: right; }
+
+/* Login screen */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+.login-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.login-logo span { color: var(--green); }
+.login-sub {
+  color: var(--text-2);
+  font-size: 15px;
+  margin-bottom: 40px;
+}
+.login-form {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.login-form-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* Progress bar */
+.progress-bar {
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-2);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+
+/* Responsive */
+@media (max-width: 380px) {
+  .score-input { width: 44px; height: 44px; font-size: 18px; }
+  .team-name { font-size: 13px; }
+  .page { padding: 16px 12px 90px; }
+}
+
+/* ── UI refinements ── */
+
+/* Smoother transitions globally */
+button, .btn, .card, .match-card, .input, select.input {
+  transition: all 0.15s ease;
+}
+
+/* Top bar refinement — more breathing room */
+.top-bar {
+  padding: 14px 16px 12px;
+  margin-bottom: 2px;
+}
+
+/* Nav strip — tighter, cleaner */
+.page { padding-top: 12px; }
+
+/* Better card hover */
+.match-card:hover { border-color: rgba(0,255,106,0.18); }
+
+/* Score inputs — rounder, more tactile */
+.score-input {
+  border-radius: 10px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Leaderboard rows — subtle hover */
+.lb-row { transition: background 0.12s ease; }
+.lb-row:hover { background: rgba(255,255,255,0.03); }
+
+/* Badge refinements */
+.badge { font-size: 10px; letter-spacing: 0.04em; }
+
+/* Input focus ring — green glow */
+.input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0,255,106,0.08);
+}
+
+/* Bottom nav — slightly taller touch targets */
+.tab-nav-item {
+  padding: 12px 4px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+}
+
+/* Page title refinement */
+.page-title { letter-spacing: 0.02em; margin-bottom: 2px; }
+.page-sub { font-size: 13px; margin-bottom: 20px; }
+
+/* Match header — cleaner */
+.match-header { padding: 9px 14px; }
+
+/* Dividers — slightly more visible */
+.divider { background: rgba(255,255,255,0.07); }
+
+/* Green button glow on hover */
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(0,255,106,0.2);
+}
+
+/* Outline button */
+.btn-outline:hover:not(:disabled) {
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+/* Progress bar — slightly taller */
+.progress-bar { height: 5px; border-radius: 3px; }
+.progress-fill { border-radius: 3px; }
+
+/* Sticky date headers in fixtures */
+@supports (backdrop-filter: blur(10px)) {
+  .sticky-date { backdrop-filter: blur(12px) saturate(1.5); }
+}
+
+/* Smooth page fade-in */
+.page { animation: fadeIn 0.2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
