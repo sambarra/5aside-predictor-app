@@ -8,8 +8,6 @@ import { getBoosterForStage, applyBooster, removeBooster } from './Booster';
 import { STAGES } from '../data/knockoutFixtures';
 import { GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 import MatchCard from '../components/MatchCard';
-const [loading, setLoading] = useState(true);
-  const [groupBooster, setGroupBooster] = useState(null);
 function groupByDate(fixtures) {
   const groups = {};
   fixtures.forEach(f => {
@@ -29,6 +27,7 @@ export default function Fixtures() {
   const [results, setResults] = useState({});
   const [filter, setFilter] = useState('Upcoming');
   const [loading, setLoading] = useState(true);
+    const [groupBooster, setGroupBooster] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
