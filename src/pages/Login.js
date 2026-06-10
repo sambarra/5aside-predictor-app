@@ -118,23 +118,23 @@ export default function Login() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr>
-                {['Round', 'Score', 'Result', 'Scorer'].map((h, i) => (
+                {['Round', 'Score', 'GD', 'Result', '⚽'].map((h, i) => (
                   <th key={h} style={{ textAlign: i === 0 ? 'left' : 'center', padding: '3px 4px 6px', color: 'var(--text-3)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {[
-                ['Group ←', 6, 2, 3, true],
-                ['R32', 7, 3, 4, false],
-                ['R16', 8, 4, 5, false],
-                ['QF', 9, 5, 6, false],
-                ['SF', 10, 6, 7, false],
-                ['Final', 11, 7, 8, false],
-              ].map(([round, score, result, scorer, current]) => (
+                ['Group ←', 6, 1, 2, 3, true],
+                ['R32', 8, 2, 3, 4, false],
+                ['R16', 10, 3, 4, 5, false],
+                ['QF', 12, 4, 5, 6, false],
+                ['SF', 14, 5, 6, 7, false],
+                ['Final', 16, 6, 7, 8, false],
+              ].map(([round, score, gd, result, scorer, current]) => (
                 <tr key={round} style={{ borderTop: '1px solid var(--border)', background: current ? 'rgba(0,255,106,0.04)' : undefined }}>
                   <td style={{ padding: '5px 4px', color: current ? 'var(--green)' : 'var(--text-2)', fontWeight: current ? 700 : 400, fontSize: 12 }}>{round}</td>
-                  {[score, result, scorer].map((v, j) => (
+                  {[score, gd, result, scorer].map((v, j) => (
                     <td key={j} style={{ padding: '5px 4px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{v}</td>
                   ))}
                 </tr>

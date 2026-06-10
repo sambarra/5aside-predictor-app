@@ -63,7 +63,7 @@ export default function Leaderboard() {
   const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [myLeagues, setMyLeagues] = useState([]);
-  const [activeTab, setActiveTab] = useState('global');
+  const [activeTab, setActiveTab] = useState(null); // null = will default to first mini league or global
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
 
@@ -225,12 +225,15 @@ export default function Leaderboard() {
     );
   }
 
+  // Default to first mini league if user has one, else global
+  const effectiveTab = activeTab ?? (myLeagues.length > 0 ? myLeagues[0].id : 'global');
+
   const tabs = [
-    { id: 'global', label: '🌍 5aside.com' },
     ...myLeagues.map(l => ({ id: l.id, label: `🏆 ${l.name}` })),
+    { id: 'global', label: '🌍 5aside.com' },
   ];
 
-  const activeLeague = myLeagues.find(l => l.id === activeTab);
+  const activeLeague = myLeagues.find(l => l.id === effectiveTab);
   const displayPlayers = activeLeague
     ? players.filter(p => activeLeague.memberIds?.includes(p.id))
     : players;
@@ -261,7 +264,7 @@ export default function Leaderboard() {
           {tabs.map(tab => (
             <button
               key={tab.id}
-              className={`btn btn-sm ${activeTab === tab.id ? 'btn-primary' : 'btn-ghost'}`}
+              className={`btn btn-sm ${effectiveTab === tab.id ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setActiveTab(tab.id)}
               style={{ flexShrink: 0, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >

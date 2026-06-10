@@ -16,12 +16,16 @@ const FAQS = [
     a: 'Yes — you can predict all 72 group stage matches in one go before the tournament starts. Each prediction locks individually 5 minutes before that match kicks off, so you can still predict later matches even after earlier ones have started.',
   },
   {
+    q: 'What is the Goal Difference (GD) bonus?',
+    a: "If your predicted goal difference matches the actual goal difference — but you didn't get the exact score — you earn a GD bonus. Example: result is 3-2 (GD +1) and you predicted 1-0 (also GD +1) — bonus awarded. It does not apply if you already got the correct score. Escalates each round: +1pt in group stage, up to +6pts in the Final.",
+  },
+  {
     q: 'What if I miss a match?',
     a: 'Missed predictions score 0 points for that match. There\'s no penalty beyond missing out — try to get your predictions in early.',
   },
   {
     q: 'How are points scored?',
-    a: 'Points escalate each round to reward predicting the tougher knockout matches correctly. See the table above for the full breakdown by round.',
+    a: 'Points escalate each round. Correct score goes up +2 per round (from +6 in the group stage to +16 in the Final). All other categories go up +1 per round. There is also a Goal Difference bonus — see below.',
   },
   {
     q: 'What happens if a match goes to extra time or penalties?',
@@ -62,8 +66,8 @@ const FAQS = [
 ];
 
 const SCORING_TABLE = [
-  { stage: 'Group Stage', exact: GROUP_STAGE_SCORING.pointsExact, result: GROUP_STAGE_SCORING.pointsResult, scorer: GROUP_STAGE_SCORING.pointsScorer, current: true },
-  ...Object.entries(STAGES).map(([, s]) => ({ stage: s.label, exact: s.pointsExact, result: s.pointsResult, scorer: s.pointsScorer, current: false })),
+  { stage: 'Group Stage', exact: GROUP_STAGE_SCORING.pointsExact, gd: GROUP_STAGE_SCORING.pointsGD, result: GROUP_STAGE_SCORING.pointsResult, scorer: GROUP_STAGE_SCORING.pointsScorer, current: true },
+  ...Object.entries(STAGES).map(([, s]) => ({ stage: s.label, exact: s.pointsExact, gd: s.pointsGD, result: s.pointsResult, scorer: s.pointsScorer, current: false })),
 ];
 
 export default function FAQ({ onBack }) {
@@ -85,7 +89,7 @@ export default function FAQ({ onBack }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
-                {['Round', 'Correct score', 'Correct result', 'Scorer'].map((h, i) => (
+                {['Round', 'Score', 'GD bonus', 'Result', 'Scorer'].map((h, i) => (
                   <th key={h} style={{ padding: '8px 12px', textAlign: i === 0 ? 'left' : 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>
@@ -93,12 +97,13 @@ export default function FAQ({ onBack }) {
             <tbody>
               {SCORING_TABLE.map((row, i) => (
                 <tr key={row.stage} style={{ borderTop: '1px solid var(--border)', background: row.current ? 'rgba(0,255,106,0.03)' : undefined }}>
-                  <td style={{ padding: '9px 12px', fontWeight: row.current ? 700 : 400, color: row.current ? 'var(--green)' : 'var(--text)' }}>
+                  <td style={{ padding: '8px 10px', fontWeight: row.current ? 700 : 400, color: row.current ? 'var(--green)' : 'var(--text)', fontSize: 12 }}>
                     {row.stage}{row.current ? ' ←' : ''}
                   </td>
-                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.exact}</td>
-                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.result}</td>
-                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.scorer}</td>
+                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.exact}</td>
+                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--amber)', fontSize: 13 }}>+{row.gd || 1}</td>
+                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.result}</td>
+                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.scorer}</td>
                 </tr>
               ))}
             </tbody>

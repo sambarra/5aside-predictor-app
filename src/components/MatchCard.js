@@ -50,10 +50,15 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
     const predAwayWin = prediction.awayScore > prediction.homeScore;
     const predDraw = prediction.homeScore === prediction.awayScore;
     const correctResult = (homeWin && predHomeWin) || (awayWin && predAwayWin) || (draw && predDraw);
+    // Goal difference bonus — only when not exact score
+    const actualGD = fixture.result.home - fixture.result.away;
+    const predGD = prediction.homeScore - prediction.awayScore;
+    const correctGD = !correctScore && (actualGD === predGD);
     if (correctScore) pts += SCORING.EXACT_SCORE;
     else if (correctResult) pts += SCORING.CORRECT_RESULT;
+    if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
     if (fixture.result.firstGoalscorer && prediction.firstGoalscorer === fixture.result.firstGoalscorer) pts += SCORING.FIRST_GOALSCORER;
-    return { pts, correctScore, correctResult };
+    return { pts, correctScore, correctResult, correctGD };
   }
 
   const pointsData = getPoints();
@@ -195,6 +200,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
                 {pointsData?.correctScore && <span className="result-correct"> ✓ Correct score (+{SCORING.EXACT_SCORE})</span>}
                 {!pointsData?.correctScore && pointsData?.correctResult && <span className="result-partial"> ✓ Correct result (+{SCORING.CORRECT_RESULT})</span>}
                 {!pointsData?.correctScore && !pointsData?.correctResult && <span className="result-wrong"> ✗ Wrong</span>}
+                {pointsData?.correctGD && <span className="result-correct"> · GD bonus (+{SCORING.GOAL_DIFFERENCE})</span>}
               </span>
               {prediction.firstGoalscorer && (
                 <span>

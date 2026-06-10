@@ -4,16 +4,16 @@
 // Based on FIFA WC2026 official bracket structure
 
 export const STAGES = {
-  r32:   { label: 'Round of 32',    shortLabel: 'R32', pointsExact: 7,  pointsResult: 3, pointsScorer: 4, startDate: '2026-07-01' },
-  r16:   { label: 'Round of 16',    shortLabel: 'R16', pointsExact: 8,  pointsResult: 4, pointsScorer: 5, startDate: '2026-07-05' },
-  qf:    { label: 'Quarter-finals', shortLabel: 'QF',  pointsExact: 9,  pointsResult: 5, pointsScorer: 6, startDate: '2026-07-10' },
-  sf:    { label: 'Semi-finals',    shortLabel: 'SF',  pointsExact: 10, pointsResult: 6, pointsScorer: 7, startDate: '2026-07-14' },
-  final: { label: 'Final',          shortLabel: 'F',   pointsExact: 11, pointsResult: 7, pointsScorer: 8, startDate: '2026-07-19' },
+  r32:   { label: 'Round of 32',    shortLabel: 'R32', pointsExact: 8,  pointsResult: 3, pointsScorer: 4, pointsGD: 2, startDate: '2026-07-01' },
+  r16:   { label: 'Round of 16',    shortLabel: 'R16', pointsExact: 10, pointsResult: 4, pointsScorer: 5, pointsGD: 3, startDate: '2026-07-05' },
+  qf:    { label: 'Quarter-finals', shortLabel: 'QF',  pointsExact: 12, pointsResult: 5, pointsScorer: 6, pointsGD: 4, startDate: '2026-07-10' },
+  sf:    { label: 'Semi-finals',    shortLabel: 'SF',  pointsExact: 14, pointsResult: 6, pointsScorer: 7, pointsGD: 5, startDate: '2026-07-14' },
+  final: { label: 'Final',          shortLabel: 'F',   pointsExact: 16, pointsResult: 7, pointsScorer: 8, pointsGD: 6, startDate: '2026-07-19' },
 };
 
 // Group stage scoring (for reference)
 export const GROUP_STAGE_SCORING = {
-  pointsExact: 6, pointsResult: 2, pointsScorer: 3,
+  pointsExact: 6, pointsResult: 2, pointsScorer: 3, pointsGD: 1,
 };
 
 // Pre-structured R32 bracket with placeholder descriptions

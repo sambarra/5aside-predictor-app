@@ -45,7 +45,7 @@ const TABS = [
   { id: 'leagues', label: 'Leagues', Icon: IconLeagues },
 ];
 
-function MoreMenu({ onAdmin, onFAQ, onClose }) {
+function MoreMenu({ onAdmin, onFAQ, onLeagues, onClose }) {
   return (
     <>
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.5)' }} />
@@ -56,6 +56,7 @@ function MoreMenu({ onAdmin, onFAQ, onClose }) {
         boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
       }}>
         {[
+          { icon: '🏆', label: 'My Leagues', action: onLeagues },
           { icon: '❓', label: 'How to Play (FAQ)', action: onFAQ },
           { icon: '⚙️', label: 'Admin', action: onAdmin },
         ].map(item => (
@@ -104,6 +105,7 @@ function AppInner() {
   const [tab, setTab] = useState('fixtures');
   const [showAdmin, setShowAdmin] = useState(false);
   const [showFAQ, setShowFAQ] = useState(false);
+  const [showLeagues, setShowLeagues] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
   if (loading) return (
@@ -133,6 +135,22 @@ function AppInner() {
     </div>
   );
 
+  if (showLeagues) return (
+    <div>
+      <TopBar />
+      <Leagues onBack={() => setShowLeagues(false)} />
+      {showMore && (
+        <MoreMenu
+          onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
+          onFAQ={() => { setShowMore(false); setShowFAQ(true); }}
+          onLeagues={() => { setShowMore(false); }}
+          onClose={() => setShowMore(false)}
+        />
+      )}
+      <BottomNav tab={tab} setTab={(t) => { setShowLeagues(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
+    </div>
+  );
+
   if (showAdmin) return (
     <div>
       <TopBar />
@@ -141,6 +159,7 @@ function AppInner() {
         <MoreMenu
           onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
           onFAQ={() => { setShowMore(false); setShowFAQ(true); }}
+          onLeagues={() => { setShowMore(false); setShowLeagues(true); }}
           onClose={() => setShowMore(false)}
         />
       )}
@@ -172,6 +191,7 @@ function AppInner() {
         {tab === 'fixtures' && <Fixtures />}
         {tab === 'tournament' && <Tournament />}
         {tab === 'leaderboard' && <Leaderboard />}
+
         {tab === 'leagues' && <Leagues />}
       </div>
 
@@ -179,6 +199,7 @@ function AppInner() {
         <MoreMenu
           onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
           onFAQ={() => { setShowMore(false); setShowFAQ(true); }}
+          onLeagues={() => { setShowMore(false); setShowLeagues(true); }}
           onClose={() => setShowMore(false)}
         />
       )}
