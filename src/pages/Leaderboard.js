@@ -225,12 +225,12 @@ export default function Leaderboard() {
     );
   }
 
-  // Default to first mini league if user has one, else global
+  // Land on first mini league if user has one, else global — but 5aside.com is always leftmost
   const effectiveTab = activeTab ?? (myLeagues.length > 0 ? myLeagues[0].id : 'global');
 
   const tabs = [
-    ...myLeagues.map(l => ({ id: l.id, label: `🏆 ${l.name}` })),
     { id: 'global', label: '🌍 5aside.com' },
+    ...myLeagues.map(l => ({ id: l.id, label: `🏆 ${l.name}` })),
   ];
 
   const activeLeague = myLeagues.find(l => l.id === effectiveTab);

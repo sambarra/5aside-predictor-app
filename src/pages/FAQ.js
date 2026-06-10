@@ -105,7 +105,7 @@ export default function FAQ({ onBack }) {
                     {row.stage}{row.current ? ' ←' : ''}
                   </td>
                   <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.exact}</td>
-                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--amber)', fontSize: 13 }}>+{row.gd || 1}</td>
+                  <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.gd || 1}</td>
                   <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.result}</td>
                   <td style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{row.scorer}</td>
                 </tr>
