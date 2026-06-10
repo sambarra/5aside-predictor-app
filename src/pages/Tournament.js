@@ -123,6 +123,7 @@ export default function TournamentPredictions() {
   const [locked, setLocked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     setLocked(new Date() >= DEADLINE);
@@ -136,6 +137,7 @@ export default function TournamentPredictions() {
       if (snap.exists()) {
         setPicks(snap.data());
         setSaved(true);
+      setDirty(false);
       }
     } finally {
       setLoading(false);
@@ -153,6 +155,7 @@ export default function TournamentPredictions() {
         savedAt: new Date().toISOString(),
       });
       setSaved(true);
+      setDirty(false);
       setLocked(true); // Lock after submit
     } finally {
       setSaving(false);
@@ -237,7 +240,7 @@ export default function TournamentPredictions() {
             onClick={handleSave}
             disabled={!allFilled || saving}
           >
-            {saving ? 'Locking in...' : saved ? '✓ Update & Lock Picks' : '🔒 Lock In My Picks'}
+            {saving ? 'Saving...' : saved && !dirty ? '✓ Picks saved — tap to edit' : dirty ? '💾 Save changes' : '🔒 Lock in my picks'}
           </button>
           {!allFilled && (
             <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-3)', marginTop: 8 }}>

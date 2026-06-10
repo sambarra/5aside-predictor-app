@@ -287,14 +287,24 @@ export default function Admin({ onBack }) {
 
   async function handleLogin() {
     setPinError('');
+    // Super admin master PIN
     if (pinInput === HARDCODED_SUPER_ADMIN) { setAuthed(true); return; }
+    // Check admins collection (PIN stored there)
     const adminsSnap = await getDocs(collection(db, 'admins'));
-    let found = false;
     for (const d of adminsSnap.docs) {
-      if (d.data().pin === pinInput) { found = true; break; }
+      if (d.data().pin === pinInput) { setAuthed(true); return; }
     }
-    if (found) setAuthed(true);
-    else setPinError('Wrong PIN. Try again.');
+    // Fallback: check if this person is in users collection and is an admin by name
+    const usersSnap = await getDocs(collection(db, 'users'));
+    for (const d of usersSnap.docs) {
+      const userData = d.data();
+      if (userData.pin === pinInput) {
+        // Check if this user is listed in admins collection
+        const adminCheck = await getDocs(query(collection(db, 'admins'), where('pin', '==', pinInput)));
+        if (!adminCheck.empty) { setAuthed(true); return; }
+      }
+    }
+    setPinError("Wrong PIN. Use your player PIN (if added as admin) or the master PIN.");
   }
 
   async function saveResult() {
@@ -397,8 +407,9 @@ export default function Admin({ onBack }) {
           <button className="btn btn-primary" onClick={handleLogin}>Enter</button>
         </div>
         {pinError && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{pinError}</p>}
-        <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 16 }}>
-          Admins use their player PIN. Super admin uses the master PIN.
+        <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 16, lineHeight: 1.6 }}>
+          Use your <strong style={{ color: 'var(--text-2)' }}>player PIN</strong> if you've been added as an admin.<br/>
+          Or use the <strong style={{ color: 'var(--text-2)' }}>master PIN</strong> for full access.
         </p>
       </div>
     );
