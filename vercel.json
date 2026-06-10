@@ -1,25 +1,9 @@
 {
-    "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-    "crons": [
-          {
-                  "path": "/api/cron-fetch-results",
-                  "schedule": "0 23 * * *"
-          }
-    ]
-}{
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-  "crons": [
-    {
-      "path": "/api/cron-fetch-results",
-{
-        "rewrites": [{ "source": "/(.*)", "destination": "/" }],
-        "crons": [
+      "rewrites": [{ "source": "/(.*)", "destination": "/" }],
+      "crons": [
               {
-                      "path": "/api/cron-fetch-results",
-                      "schedule": "0 23 * * *"
+                        "path": "/api/cron-fetch-results",
+                        "schedule": "0 23 * * *"
               }
-        ]
-    }"schedule": "0 * * * *"
-    }
-  ]
+      ]
 }
