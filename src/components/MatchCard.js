@@ -1,6 +1,6 @@
 // build-20260609
 import React, { useState } from 'react';
-import { getPlayersForMatch } from '../data/squads';
+import { getSquadOrdered } from '../data/squads';
 
 export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? '');
@@ -137,7 +137,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
               >
                 <option value="">Pick a player...</option>
                 {(() => {
-                  const players = getPlayersForMatch(fixture.home, fixture.away);
+                  const players = [...getSquadOrdered(fixture.home), ...getSquadOrdered(fixture.away)];
                   const homePlayers = players.filter(p => p.team === fixture.home);
                   const awayPlayers = players.filter(p => p.team === fixture.away);
                   return (

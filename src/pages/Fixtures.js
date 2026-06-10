@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs, setDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
+import { STAGES } from '../data/knockoutFixtures';
 import { GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 import MatchCard from '../components/MatchCard';
 

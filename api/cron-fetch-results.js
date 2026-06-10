@@ -131,7 +131,8 @@ export default async function handler(req, res) {
     let saved = 0;
 
     for (const match of data.matches) {
-      if (match.score.fullTime.home === null) continue;
+      if (match.score?.fullTime?.home === null && match.score?.fullTime?.home === undefined) continue;
+      if (match.score?.fullTime?.home === null) continue;
 
       const fixture = FIXTURES.find(f =>
         matchTeamName(f.home, match.homeTeam.name) &&
@@ -149,10 +150,20 @@ export default async function handler(req, res) {
         if (sorted[0]?.scorer?.name) firstGoalscorer = sorted[0].scorer.name;
       }
 
+      // Use extraTime score if available (goals in ET count), ignore penalties
+      const duration = match.score.duration; // REGULAR, EXTRA_TIME, PENALTY_SHOOTOUT
+      let finalHome = match.score.fullTime.home;
+      let finalAway = match.score.fullTime.away;
+      if ((duration === 'EXTRA_TIME' || duration === 'PENALTY_SHOOTOUT') && match.score.extraTime?.home !== null) {
+        finalHome = match.score.extraTime.home;
+        finalAway = match.score.extraTime.away;
+      }
+
       await db.collection('results').doc(fixture.id).set({
-        home: match.score.fullTime.home,
-        away: match.score.fullTime.away,
+        home: finalHome,
+        away: finalAway,
         firstGoalscorer,
+        duration: duration || 'REGULAR',
         autoFetched: true,
         fetchedAt: new Date().toISOString(),
       }, { merge: true });

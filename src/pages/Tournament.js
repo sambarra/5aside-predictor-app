@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { TOURNAMENT_PREDICTIONS_CONFIG, ALL_TEAMS } from '../data/fixtures';
-import { SQUADS } from '../data/squads';
+import { SQUADS, getSquadOrdered } from '../data/squads';
 
 // Golden boot players now come from SQUADS data
 
@@ -17,8 +17,8 @@ function PlayerSearch({ value, onChange, disabled }) {
   const ref = useRef(null);
 
   // Build flat list of all players with team
-  const allPlayers = Object.entries(SQUADS).flatMap(([team, players]) =>
-    players.map(p => ({ label: `${p}`, sub: team, value: `${p} (${team})` }))
+  const allPlayers = Object.entries(SQUADS).flatMap(([team]) =>
+    getSquadOrdered(team).map(p => ({ label: p.name, pos: p.pos, sub: team, value: `${p.name} (${team})` }))
   );
 
   const filtered = query.length > 1
@@ -93,7 +93,10 @@ function PlayerSearch({ value, onChange, disabled }) {
               onMouseLeave={e => e.currentTarget.style.background = value === p.value ? 'rgba(0,255,106,0.06)' : ''}
             >
               <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{p.label}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 8 }}>{p.sub}</span>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginLeft: 8 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--green)', background: 'rgba(0,255,106,0.1)', padding: '2px 5px', borderRadius: 4 }}>{p.pos}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{p.sub}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -224,24 +227,6 @@ export default function TournamentPredictions() {
             )}
           </div>
         ))}
-      </div>
-
-      {/* Bonus points summary - at bottom */}
-      <div className="card" style={{ marginTop: 4, marginBottom: 16 }}>
-        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-          Bonus points on offer
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {TOURNAMENT_PREDICTIONS_CONFIG.map(cfg => (
-            <div key={cfg.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 18 }}>{cfg.icon}</span>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-2)' }}>{cfg.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)' }}>+{cfg.points}pts</div>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Save button */}

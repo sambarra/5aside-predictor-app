@@ -5,8 +5,222 @@ import {
   doc, setDoc, getDocs, collection, deleteDoc, query, where
 } from 'firebase/firestore';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
+import { STAGES, R32_BRACKET, KNOCKOUT_TEMPLATE } from '../data/knockoutFixtures';
 
 const HARDCODED_SUPER_ADMIN = 'WC2026admin';
+
+// Knockout fixture management component
+function KnockoutTab({ knockoutFixtures, selectedStage, setSelectedStage, addingKnockout, setAddingKnockout, knockoutMsg, setKnockoutMsg, loadKnockoutFixtures, db }) {
+  const [editFixture, setEditFixture] = useState(null);
+  const [form, setForm] = useState({ home: '', away: '', kickoff: '' });
+  const [saving, setSaving] = useState(false);
+
+  const stageFixtures = knockoutFixtures.filter(f => f.stage === selectedStage);
+  const stageInfo = STAGES[selectedStage];
+
+  // Auto-populate R32 bracket from the pre-defined structure
+  async function populateR32() {
+    if (!window.confirm('Populate Round of 32 fixtures with the standard bracket structure? You can edit team names afterwards.')) return;
+    setSaving(true);
+    try {
+      for (const fixture of R32_BRACKET) {
+        await setDoc(doc(db, 'knockoutFixtures', fixture.id), {
+          ...fixture,
+          home: fixture.homeDesc,
+          away: fixture.awayDesc,
+          kickoff: '',
+          active: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      await loadKnockoutFixtures();
+      setKnockoutMsg('✓ Round of 32 fixtures created. Edit team names once group stage is complete.');
+    } catch (err) {
+      setKnockoutMsg('❌ Error: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // Auto-populate a knockout round from template
+  async function populateFromTemplate(stage) {
+    const template = KNOCKOUT_TEMPLATE[stage];
+    if (!template) return;
+    if (!window.confirm(`Populate ${STAGES[stage].label} fixtures? Edit team names after.`)) return;
+    setSaving(true);
+    try {
+      for (const fixture of template) {
+        await setDoc(doc(db, 'knockoutFixtures', fixture.id), {
+          ...fixture,
+          home: fixture.homeDesc,
+          away: fixture.awayDesc,
+          kickoff: '',
+          active: false,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      await loadKnockoutFixtures();
+      setKnockoutMsg(`✓ ${STAGES[stage].label} fixtures created.`);
+    } catch (err) {
+      setKnockoutMsg('❌ Error: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveFixture() {
+    if (!editFixture || !form.home || !form.away) return;
+    setSaving(true);
+    try {
+      await setDoc(doc(db, 'knockoutFixtures', editFixture.id), {
+        ...editFixture,
+        home: form.home,
+        away: form.away,
+        kickoff: form.kickoff,
+      }, { merge: true });
+      await loadKnockoutFixtures();
+      setEditFixture(null);
+      setKnockoutMsg('✓ Fixture updated');
+      setTimeout(() => setKnockoutMsg(''), 3000);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function activateStage(stage) {
+    if (!window.confirm(`Activate ${STAGES[stage].label} for predictions? Players will immediately see these fixtures.`)) return;
+    const stageFixtures = knockoutFixtures.filter(f => f.stage === stage);
+    for (const f of stageFixtures) {
+      await setDoc(doc(db, 'knockoutFixtures', f.id), { active: true }, { merge: true });
+    }
+    await loadKnockoutFixtures();
+    setKnockoutMsg(`✓ ${STAGES[stage].label} is now live for predictions`);
+  }
+
+  return (
+    <div>
+      <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 14, lineHeight: 1.5 }}>
+        Manage knockout round fixtures. Populate each round once team names are known, edit kickoff times, then activate to open predictions.
+      </p>
+
+      {knockoutMsg && (
+        <div style={{ padding: '10px 14px', background: 'var(--surface-2)', borderRadius: 8, marginBottom: 14, fontSize: 13, color: knockoutMsg.startsWith('✓') ? 'var(--green)' : 'var(--red)' }}>
+          {knockoutMsg}
+        </div>
+      )}
+
+      {/* Stage selector */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, flexWrap: 'wrap' }}>
+        {Object.entries(STAGES).map(([key, s]) => {
+          const count = knockoutFixtures.filter(f => f.stage === key).length;
+          const active = knockoutFixtures.filter(f => f.stage === key && f.active).length > 0;
+          return (
+            <button
+              key={key}
+              className={`btn btn-sm ${selectedStage === key ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setSelectedStage(key)}
+              style={{ flexShrink: 0 }}
+            >
+              {s.shortLabel}
+              {count > 0 && <span style={{ marginLeft: 4, fontSize: 10, color: active ? 'var(--green)' : 'var(--text-3)' }}>
+                {active ? '●' : '○'}
+              </span>}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Current stage info */}
+      <div className="card" style={{ marginBottom: 14, padding: '12px 16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div>
+            <p style={{ fontWeight: 700, fontSize: 14 }}>{stageInfo.label}</p>
+            <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
+              +{stageInfo.pointsExact}pts correct score · +{stageInfo.pointsResult}pts correct result · +{stageInfo.pointsScorer}pts scorer
+            </p>
+          </div>
+          {stageFixtures.length > 0 && stageFixtures.some(f => !f.active) && (
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => activateStage(selectedStage)}
+            >
+              🟢 Activate
+            </button>
+          )}
+          {stageFixtures.length > 0 && stageFixtures.every(f => f.active) && (
+            <span className="badge badge-green">Live ●</span>
+          )}
+        </div>
+
+        {/* Populate buttons */}
+        {stageFixtures.length === 0 && (
+          <button
+            className="btn btn-outline btn-full"
+            onClick={() => selectedStage === 'r32' ? populateR32() : populateFromTemplate(selectedStage)}
+            disabled={saving}
+            style={{ marginTop: 4 }}
+          >
+            {saving ? '⏳ Creating...' : `⚡ Auto-populate ${stageInfo.label} fixtures`}
+          </button>
+        )}
+      </div>
+
+      {/* Fixture list */}
+      {stageFixtures.length > 0 && (
+        <div className="card" style={{ padding: 0, marginBottom: 14 }}>
+          {stageFixtures.map((f, idx) => (
+            <div key={f.id} style={{
+              padding: '10px 14px', borderBottom: idx < stageFixtures.length - 1 ? '1px solid var(--border)' : undefined,
+              background: editFixture?.id === f.id ? 'rgba(0,255,106,0.04)' : undefined,
+            }}>
+              {editFixture?.id === f.id ? (
+                <div>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                    <input className="input" placeholder="Home team" value={form.home} onChange={e => setForm(p => ({ ...p, home: e.target.value }))} style={{ flex: 1 }} />
+                    <input className="input" placeholder="Away team" value={form.away} onChange={e => setForm(p => ({ ...p, away: e.target.value }))} style={{ flex: 1 }} />
+                  </div>
+                  <input
+                    className="input"
+                    type="datetime-local"
+                    value={form.kickoff}
+                    onChange={e => setForm(p => ({ ...p, kickoff: e.target.value }))}
+                    style={{ marginBottom: 8, width: '100%' }}
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn btn-ghost btn-sm" onClick={() => setEditFixture(null)}>Cancel</button>
+                    <button className="btn btn-primary btn-sm" onClick={saveFixture} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>
+                      {f.home} <span style={{ color: 'var(--text-3)' }}>vs</span> {f.away}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
+                      {f.kickoff ? new Date(f.kickoff).toLocaleString('en-GB', { timeZone: 'Europe/London', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'Kickoff TBC'}
+                      {f.active && <span style={{ color: 'var(--green)', marginLeft: 8 }}>● Live</span>}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    style={{ fontSize: 11 }}
+                    onClick={() => { setEditFixture(f); setForm({ home: f.home, away: f.away, kickoff: f.kickoff || '' }); }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 export default function Admin({ onBack }) {
   const [authed, setAuthed] = useState(false);
@@ -23,9 +237,14 @@ export default function Admin({ onBack }) {
   const [players, setPlayers] = useState([]);
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [admins, setAdmins] = useState([]);
+  const [showPins, setShowPins] = useState(false);
   const [newAdminName, setNewAdminName] = useState('');
   const [adminMsg, setAdminMsg] = useState('');
   const [viewingMatch, setViewingMatch] = useState(null);
+  const [knockoutFixtures, setKnockoutFixtures] = useState([]);
+  const [addingKnockout, setAddingKnockout] = useState(false);
+  const [knockoutMsg, setKnockoutMsg] = useState('');
+  const [selectedStage, setSelectedStage] = useState('r32');
   const [matchPredictions, setMatchPredictions] = useState([]);
 
   const loadResults = useCallback(async () => {
@@ -56,8 +275,15 @@ export default function Admin({ onBack }) {
   }, []);
 
   useEffect(() => {
-    if (authed) { loadResults(); loadPlayers(); loadAdmins(); }
+    if (authed) { loadResults(); loadPlayers(); loadAdmins(); loadKnockoutFixtures(); }
   }, [authed, loadResults, loadPlayers, loadAdmins]);
+
+  const loadKnockoutFixtures = useCallback(async () => {
+    const snap = await getDocs(collection(db, 'knockoutFixtures'));
+    const list = [];
+    snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+    setKnockoutFixtures(list);
+  }, []);
 
   async function handleLogin() {
     setPinError('');
@@ -200,7 +426,7 @@ export default function Admin({ onBack }) {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins']].map(([t, label]) => (
+        {[['results', '⚽ Results'], ['players', '👥 Players'], ['admins', '🔑 Admins'], ['knockout', '🏆 Knockout']].map(([t, label]) => (
           <button key={t} className={`btn btn-sm ${activeTab === t ? 'btn-primary' : 'btn-ghost'}`}
             onClick={() => setActiveTab(t)} style={{ flexShrink: 0 }}>{label}</button>
         ))}
@@ -294,7 +520,10 @@ export default function Admin({ onBack }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <p style={{ fontSize: 13, color: 'var(--text-2)' }}>{players.length} registered players</p>
-            <button className="btn btn-ghost btn-sm" onClick={loadPlayers}>↺ Refresh</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowPins(p => !p)}>{showPins ? '🔒 Hide PINs' : '🔑 Show PINs'}</button>
+              <button className="btn btn-ghost btn-sm" onClick={loadPlayers}>↺ Refresh</button>
+            </div>
           </div>
           {loadingPlayers ? <p style={{ color: 'var(--text-2)', fontSize: 13 }}>Loading...</p> : (
             <div className="card" style={{ padding: 0 }}>
@@ -314,6 +543,20 @@ export default function Admin({ onBack }) {
             </div>
           )}
         </div>
+      )}
+
+      {activeTab === 'knockout' && (
+        <KnockoutTab
+          knockoutFixtures={knockoutFixtures}
+          selectedStage={selectedStage}
+          setSelectedStage={setSelectedStage}
+          addingKnockout={addingKnockout}
+          setAddingKnockout={setAddingKnockout}
+          knockoutMsg={knockoutMsg}
+          setKnockoutMsg={setKnockoutMsg}
+          loadKnockoutFixtures={loadKnockoutFixtures}
+          db={db}
+        />
       )}
 
       {activeTab === 'admins' && (

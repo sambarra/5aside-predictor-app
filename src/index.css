@@ -227,21 +227,23 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
 /* Match card */
 .match-card {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: var(--radius);
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  transition: border-color 0.15s ease;
 }
-.match-card.completed { border-color: rgba(0,255,106,0.15); }
-.match-card.locked { opacity: 0.65; }
+.match-card.completed { border-color: rgba(0,255,106,0.25); background: rgba(0,255,106,0.02); }
+.match-card.locked { opacity: 0.7; }
+.match-card:not(.locked):not(.completed) { border-color: rgba(255,255,255,0.12); }
 
 .match-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--surface-2);
-  border-bottom: 1px solid var(--border);
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .match-meta { font-size: 11px; color: var(--text-2); }
 .match-meta strong { color: var(--text); }
@@ -257,7 +259,8 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
 .team-name {
   flex: 1;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
 .team-name.away { text-align: right; }
 

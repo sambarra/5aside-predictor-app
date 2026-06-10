@@ -229,7 +229,7 @@ export default function Leaderboard() {
   }
 
   const tabs = [
-    { id: 'global', label: '🌍 Global' },
+    { id: 'global', label: '🌍 5aside.com' },
     ...myLeagues.map(l => ({ id: l.id, label: `🏆 ${l.name}` })),
   ];
 
