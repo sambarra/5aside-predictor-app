@@ -75,7 +75,7 @@ function MoreMenu({ onAdmin, onFAQ, onLeagues, onClose }) {
 }
 
 // Bottom nav always visible — shared across all views
-function BottomNav({ tab, setTab, showMore, setShowMore }) {
+function BottomNav({ tab, setTab, showMore, setShowMore, moreActive }) {
   return (
     <nav className="tab-nav">
       {TABS.map(({ id, label, Icon }) => (
@@ -89,7 +89,7 @@ function BottomNav({ tab, setTab, showMore, setShowMore }) {
         </button>
       ))}
       <button
-        className={`tab-nav-item ${showMore ? 'active' : ''}`}
+        className={`tab-nav-item ${showMore || moreActive ? 'active' : ''}`}
         onClick={() => setShowMore(m => !m)}
       >
         <IconMore />
@@ -103,7 +103,10 @@ function AppInner() {
   const { user, logout, loading } = useAuth();
   const [tab, setTab] = useState('fixtures');
   const [showAdmin, setShowAdmin] = useState(false);
-  const [showFAQ, setShowFAQ] = useState(false);
+  // Show FAQ by default on first visit of session
+  const [showFAQ, setShowFAQ] = useState(() => {
+    try { return !localStorage.getItem('5aside_seen_faq'); } catch(e) { return true; }
+  });
   const [showLeagues, setShowLeagues] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
@@ -146,7 +149,7 @@ function AppInner() {
           onClose={() => setShowMore(false)}
         />
       )}
-      <BottomNav tab={tab} setTab={(t) => { setShowLeagues(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
+      <BottomNav tab={tab} setTab={(t) => { setShowLeagues(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} moreActive={true} />
     </div>
   );
 
@@ -162,14 +165,14 @@ function AppInner() {
           onClose={() => setShowMore(false)}
         />
       )}
-      <BottomNav tab={tab} setTab={(t) => { setShowAdmin(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
+      <BottomNav tab={tab} setTab={(t) => { setShowAdmin(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} moreActive={true} />
     </div>
   );
 
   if (showFAQ) return (
     <div>
       <TopBar />
-      <FAQ onBack={() => setShowFAQ(false)} />
+      <FAQ onBack={() => (() => { try { localStorage.setItem('5aside_seen_faq', '1'); } catch(e) {} setShowFAQ(false); })()} />
       {showMore && (
         <MoreMenu
           onAdmin={() => { setShowMore(false); setShowAdmin(true); }}
@@ -177,7 +180,7 @@ function AppInner() {
           onClose={() => setShowMore(false)}
         />
       )}
-      <BottomNav tab={tab} setTab={(t) => { setShowFAQ(false); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
+      <BottomNav tab={tab} setTab={(t) => { (() => { try { localStorage.setItem('5aside_seen_faq', '1'); } catch(e) {} setShowFAQ(false); })(); setTab(t); }} showMore={showMore} setShowMore={setShowMore} />
     </div>
   );
 
@@ -203,7 +206,7 @@ function AppInner() {
         />
       )}
 
-      <BottomNav tab={tab} setTab={setTab} showMore={showMore} setShowMore={setShowMore} />
+      <BottomNav tab={tab} setTab={setTab} showMore={showMore} setShowMore={setShowMore} moreActive={false} />
     </div>
   );
 }
