@@ -136,21 +136,16 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
                 style={{ flex: 1 }}
               >
                 <option value="">Pick a player...</option>
-                {(() => {
-                  const players = [...getSquadOrdered(fixture.home), ...getSquadOrdered(fixture.away)];
-                  const homePlayers = players.filter(p => p.team === fixture.home);
-                  const awayPlayers = players.filter(p => p.team === fixture.away);
-                  return (
-                    <>
-                      <optgroup label={fixture.home}>
-                        {homePlayers.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                      </optgroup>
-                      <optgroup label={fixture.away}>
-                        {awayPlayers.map(p => <option key={p.name} value={p.name}>{p.name}</option>)}
-                      </optgroup>
-                    </>
-                  );
-                })()}
+                <optgroup label={`⚽ ${fixture.home}`}>
+                  {getSquadOrdered(fixture.home).map(p => (
+                    <option key={p.name} value={p.name}>[{p.pos}] {p.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label={`⚽ ${fixture.away}`}>
+                  {getSquadOrdered(fixture.away).map(p => (
+                    <option key={p.name} value={p.name}>[{p.pos}] {p.name}</option>
+                  ))}
+                </optgroup>
               </select>
             </div>
           </div>

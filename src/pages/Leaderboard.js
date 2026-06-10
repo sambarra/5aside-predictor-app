@@ -193,9 +193,7 @@ export default function Leaderboard() {
                 <div>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 6 }}>you</span>}
-                  <div style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 1 }}>
-                    {player.correctScores}S · {player.correctResults}R{player.scorerPts > 0 ? ` · ⚽${player.scorerPts}pts` : ''}
-                  </div>
+
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
                 <span style={{ textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>{player.correctScores}</span>

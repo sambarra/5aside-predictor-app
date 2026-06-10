@@ -117,7 +117,7 @@ function AppInner() {
   // Top bar — always the same
   const TopBar = () => (
     <div className="top-bar">
-      <img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} />
+      <a href="https://5aside.com" target="_blank" rel="noopener noreferrer"><img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} /></a>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
           {user.name}
