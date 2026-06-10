@@ -81,7 +81,7 @@ function BottomNav({ tab, setTab, showMore, setShowMore, moreActive }) {
       {TABS.map(({ id, label, Icon }) => (
         <button
           key={id}
-          className={`tab-nav-item ${tab === id ? 'active' : ''}`}
+          className={`tab-nav-item ${!moreActive && tab === id ? 'active' : ''}`}
           onClick={() => setTab(id)}
         >
           <Icon />

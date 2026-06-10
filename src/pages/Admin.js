@@ -375,12 +375,17 @@ function LeaguesAdminTab({ db }) {
 
   useEffect(() => {
     (async () => {
-      const snap = await getDocs(collection(db, 'leagues'));
-      const list = [];
-      snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-      list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-      setLeagues(list);
-      setLoading(false);
+      try {
+        const snap = await getDocs(collection(db, 'leagues'));
+        const list = [];
+        snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        setLeagues(list);
+      } catch (err) {
+        setMsg('\u274c Error loading leagues: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [db]);
 
