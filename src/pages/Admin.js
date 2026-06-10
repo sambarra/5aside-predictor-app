@@ -379,7 +379,11 @@ function LeaguesAdminTab({ db }) {
         const snap = await getDocs(collection(db, 'leagues'));
         const list = [];
         snap.forEach(d => list.push({ id: d.id, ...d.data() }));
-        list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+        list.sort((a, b) => {
+        const aT = a.createdAt?.seconds || (typeof a.createdAt === 'string' ? Date.parse(a.createdAt) / 1000 : 0);
+        const bT = b.createdAt?.seconds || (typeof b.createdAt === 'string' ? Date.parse(b.createdAt) / 1000 : 0);
+        return bT - aT;
+      });
         setLeagues(list);
       } catch (err) {
         setMsg('\u274c Error loading leagues: ' + err.message);
