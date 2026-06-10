@@ -77,7 +77,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked }) {
   // ── Save button label ──────────────────────────────────────────
   function saveButtonLabel() {
     if (saving) return 'Saving...';
-    if (saved) return '✓ Prediction saved — tap to update';
+    if (saved) return '✓ Saved — edit anytime before kick-off';
     if (homeScore !== '' && awayScore !== '' && !scorer) return 'Pick a scorer to save';
     if (homeScore !== '' || awayScore !== '') return 'Save prediction';
     return 'Enter a score to predict';

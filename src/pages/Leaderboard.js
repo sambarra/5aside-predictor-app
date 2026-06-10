@@ -161,11 +161,11 @@ export default function Leaderboard() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header row */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '32px 1fr 40px 40px 80px',
+          display: 'grid', gridTemplateColumns: '32px 1fr 44px 80px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
-          {['#', 'Player', 'Pts', 'S', 'Form'].map((h, i) => (
+          {['#', 'Player', 'Pts', 'Form'].map((h, i) => (
             <span key={h} style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: i > 1 ? 'center' : 'left' }}>{h}</span>
           ))}
         </div>
@@ -180,7 +180,7 @@ export default function Leaderboard() {
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '32px 1fr 40px 40px 80px',
+                  display: 'grid', gridTemplateColumns: '32px 1fr 44px 80px',
                   padding: '11px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
@@ -196,7 +196,6 @@ export default function Leaderboard() {
 
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
-                <span style={{ textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--text-2)' }}>{player.correctScores}</span>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                   <FormStrip form={player.form} />
                 </div>
