@@ -1,49 +1,69 @@
-// build-20260609
+// build-20260610
 import React, { useState } from 'react';
 import { STAGES, GROUP_STAGE_SCORING } from '../data/knockoutFixtures';
 
 const FAQS = [
   {
     q: 'How do I play?',
-    a: 'Enter a name and 4-digit PIN to join. Then predict the score of every match before kickoff. The better your predictions, the more points you earn. Compare your total on the Standings tab.',
+    a: 'Enter a name and 4-digit PIN to join. Then predict the scoreline of every World Cup match before it kicks off. Earn points for correct scores, correct results (win/draw/loss), and picking the first goalscorer. The more accurate your predictions, the higher you climb the standings.',
+  },
+  {
+    q: 'When do predictions lock?',
+    a: 'Predictions lock 5 minutes before each match kicks off (UK time). You can edit your prediction right up until that cutoff. For example, if a match kicks off at 20:00 UK time, predictions close at 19:55.',
   },
   {
     q: 'Can I predict all matches at once?',
-    a: 'Yes — you can predict all group stage matches in one go before the tournament starts. Each prediction locks individually at kickoff time, so you can still predict later matches even if you missed an early one.',
+    a: 'Yes — you can predict all 72 group stage matches in one go before the tournament starts. Each prediction locks individually 5 minutes before that match kicks off, so you can still predict later matches even after earlier ones have started.',
   },
   {
     q: 'What if I miss a match?',
-    a: 'Missed predictions score 0 points for that match. There\'s no penalty beyond missing out — so try to get your predictions in early.',
+    a: 'Missed predictions score 0 points for that match. There\'s no penalty beyond missing out — try to get your predictions in early.',
   },
   {
     q: 'How are points scored?',
-    a: 'Points escalate each round to reward predicting the tougher matches correctly.',
+    a: 'Points escalate each round to reward predicting the tougher knockout matches correctly. See the table above for the full breakdown by round.',
   },
   {
-    q: 'What happens in a penalty shootout?',
-    a: 'Predict the score after 90 minutes (not including extra time or penalties). If the match goes to a shootout, the result is a draw at 90 minutes for scoring purposes.',
+    q: 'What happens if a match goes to extra time or penalties?',
+    a: 'Goals scored in extra time count — so if a match ends 1-1 after 90 minutes and one team scores in extra time to make it 2-1, the final score is 2-1. Penalty shootout goals do not count. If the match stays level through extra time and goes to a shootout, the score is recorded as the draw score at the end of extra time (e.g. 1-1). This is confirmed by how football-data.org reports results.',
   },
   {
     q: 'What are Tournament Predictions?',
-    a: 'Before the first match on 11 June, you can lock in four bonus predictions: Tournament Winner (+30pts), Runner-up (+20pts), Third Place (+10pts), and Golden Boot (+20pts). These can\'t be changed once submitted.',
+    a: 'Before the first match kicks off (deadline: 19:55 UK time on 11 June), you can lock in four bonus predictions: Tournament Winner (+30pts), Runner-up (+20pts), Third Place (+10pts), and Golden Boot scorer (+20pts). These cannot be changed once submitted.',
   },
   {
     q: 'When do knockout rounds open for predictions?',
-    a: 'Each knockout round opens once the previous round is complete and the fixtures are confirmed. An admin will activate each round — you\'ll see it appear in the Predict tab.',
+    a: 'Each knockout round opens once the previous round\'s fixtures are confirmed. An admin will activate each round — you\'ll see it appear in the Predict tab. There\'s usually a day or so between rounds to get your predictions in.',
+  },
+  {
+    q: 'Do my predictions count across all leagues?',
+    a: 'Yes — your predictions are the same everywhere. Whether you\'re in the global 5aside.com standings or one or more mini leagues, the same predictions count for all of them. You can\'t have different predictions for different leagues.',
+  },
+  {
+    q: 'How do mini leagues work?',
+    a: 'Go to the Leagues tab to create a private league or join one with a code. When you create a league you get a 5-character code to share with friends via WhatsApp. Anyone who enters the code joins your league and appears in your private standings alongside the global table.',
+  },
+  {
+    q: 'How do I read the form strip?',
+    a: 'The coloured squares next to each player show their last 5 match outcomes. S (green) = correct score. R (orange) = correct result (right winner/draw but wrong scoreline). ✗ (red) = wrong. – (grey) = no prediction submitted. Tap any player row to expand and see their full points progression graph.',
   },
   {
     q: 'How do I log back in?',
-    a: 'Use the exact same name and PIN you used when you first joined. Names aren\'t case-sensitive — "Sam" and "sam" both work.',
+    a: 'Use the exact same name and PIN you used when you first joined. Names aren\'t case-sensitive — "Sam" and "sam" are treated the same.',
   },
   {
-    q: 'Can I change my PIN?',
-    a: 'Not currently — your PIN is set when you first register. Make sure to remember it.',
+    q: 'I\'ve forgotten my PIN — what do I do?',
+    a: 'Contact the league admin (Sam). Admins can look up your PIN in the Admin panel — go to Admin → Players → tap "Show PINs" and find your name. They\'ll be able to remind you.',
+  },
+  {
+    q: 'When are scores updated?',
+    a: 'Results update automatically once per day at midnight UK time. If an admin is watching the matches they may update results sooner using the manual refresh button in the Admin panel.',
   },
 ];
 
 const SCORING_TABLE = [
-  { stage: 'Group Stage', exact: GROUP_STAGE_SCORING.pointsExact, result: GROUP_STAGE_SCORING.pointsResult, scorer: GROUP_STAGE_SCORING.pointsScorer },
-  ...Object.entries(STAGES).map(([, s]) => ({ stage: s.label, exact: s.pointsExact, result: s.pointsResult, scorer: s.pointsScorer })),
+  { stage: 'Group Stage', exact: GROUP_STAGE_SCORING.pointsExact, result: GROUP_STAGE_SCORING.pointsResult, scorer: GROUP_STAGE_SCORING.pointsScorer, current: true },
+  ...Object.entries(STAGES).map(([, s]) => ({ stage: s.label, exact: s.pointsExact, result: s.pointsResult, scorer: s.pointsScorer, current: false })),
 ];
 
 export default function FAQ({ onBack }) {
@@ -65,26 +85,39 @@ export default function FAQ({ onBack }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
-                <th style={{ padding: '8px 14px', textAlign: 'left', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Round</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Exact</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Result</th>
-                <th style={{ padding: '8px 10px', textAlign: 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase' }}>Scorer</th>
+                {['Round', 'Correct score', 'Correct result', 'Scorer'].map((h, i) => (
+                  <th key={h} style={{ padding: '8px 12px', textAlign: i === 0 ? 'left' : 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {SCORING_TABLE.map((row, i) => (
-                <tr key={row.stage} style={{ borderTop: '1px solid var(--border)', background: i === 0 ? 'rgba(0,255,106,0.03)' : undefined }}>
-                  <td style={{ padding: '9px 14px', fontWeight: i === 0 ? 700 : 400, color: i === 0 ? 'var(--green)' : 'var(--text)' }}>
-                    {row.stage} {i === 0 ? '← current' : ''}
+                <tr key={row.stage} style={{ borderTop: '1px solid var(--border)', background: row.current ? 'rgba(0,255,106,0.03)' : undefined }}>
+                  <td style={{ padding: '9px 12px', fontWeight: row.current ? 700 : 400, color: row.current ? 'var(--green)' : 'var(--text)' }}>
+                    {row.stage}{row.current ? ' ←' : ''}
                   </td>
-                  <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.exact}</td>
-                  <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.result}</td>
-                  <td style={{ padding: '9px 10px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.scorer}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.exact}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.result}</td>
+                  <td style={{ padding: '9px 12px', textAlign: 'center', fontWeight: 700, color: 'var(--green)' }}>+{row.scorer}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Tournament bonus */}
+      <div className="card" style={{ marginBottom: 24, padding: '12px 16px' }}>
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Tournament bonus predictions</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          {[['🏆 Winner', '+30pts'], ['🥈 Runner-up', '+20pts'], ['🥉 Third place', '+10pts'], ['⚽ Golden Boot', '+20pts']].map(([label, pts]) => (
+            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
+              <span style={{ color: 'var(--text-2)' }}>{label}</span>
+              <span style={{ fontWeight: 700, color: 'var(--green)' }}>{pts}</span>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 8 }}>Lock in before 19:55 UK time on 11 June — can't be changed after.</p>
       </div>
 
       {/* FAQ accordion */}

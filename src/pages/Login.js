@@ -110,21 +110,37 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Match scoring */}
+        {/* Points per round table */}
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
-          <p style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, fontWeight: 600 }}>
-            Per match
+          <p style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10, fontWeight: 600 }}>
+            Points per round
           </p>
-          {[
-            ['Correct score', '+6 pts'],
-            ['Correct result (W/D/L)', '+2 pts'],
-            ['First goalscorer', '+3 pts'],
-          ].map(([label, pts]) => (
-            <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 6, marginBottom: 6, borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{label}</span>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)' }}>{pts}</span>
-            </div>
-          ))}
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <thead>
+              <tr>
+                {['Round', 'Score', 'Result', 'Scorer'].map((h, i) => (
+                  <th key={h} style={{ textAlign: i === 0 ? 'left' : 'center', padding: '3px 4px 6px', color: 'var(--text-3)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['Group ←', 6, 2, 3, true],
+                ['R32', 7, 3, 4, false],
+                ['R16', 8, 4, 5, false],
+                ['QF', 9, 5, 6, false],
+                ['SF', 10, 6, 7, false],
+                ['Final', 11, 7, 8, false],
+              ].map(([round, score, result, scorer, current]) => (
+                <tr key={round} style={{ borderTop: '1px solid var(--border)', background: current ? 'rgba(0,255,106,0.04)' : undefined }}>
+                  <td style={{ padding: '5px 4px', color: current ? 'var(--green)' : 'var(--text-2)', fontWeight: current ? 700 : 400, fontSize: 12 }}>{round}</td>
+                  {[score, result, scorer].map((v, j) => (
+                    <td key={j} style={{ padding: '5px 4px', textAlign: 'center', fontWeight: 700, color: 'var(--green)', fontSize: 13 }}>+{v}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Tournament scoring */}
