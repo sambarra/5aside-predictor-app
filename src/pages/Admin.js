@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
 import {
-  doc, setDoc, getDocs, collection, deleteDoc, query, where
+  doc, setDoc, updateDoc, getDocs, collection, deleteDoc, query, where
 } from 'firebase/firestore';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
 import { STAGES, R32_BRACKET, KNOCKOUT_TEMPLATE } from '../data/knockoutFixtures';
@@ -447,6 +447,8 @@ function LeaguesAdminTab({ db }) {
 export default function Admin({ onBack }) {
   const [authed, setAuthed] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [editingPlayerId, setEditingPlayerId] = useState(null);
+  const [editNameVal, setEditNameVal] = useState('');
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [activeTab, setActiveTab] = useState('results');
@@ -618,7 +620,18 @@ export default function Admin({ onBack }) {
     setMsg('');
   }
 
-  if (!authed) {
+  async function renamePlayer(playerId, newName) {
+    if (!newName.trim()) return;
+    try {
+      await updateDoc(doc(db, 'users', playerId), { name: newName.trim() });
+      setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, name: newName.trim() } : p));
+      setEditingPlayerId(null);
+    } catch (err) {
+      alert('Error renaming player: ' + err.message);
+    }
+  }
+
+    if (!authed) {
     return (
       <div className="page" style={{ maxWidth: 400 }}>
         <h1 className="page-title">⚙️ Admin</h1>
@@ -767,7 +780,31 @@ export default function Admin({ onBack }) {
               {players.map((player, idx) => (
                 <div key={player.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderBottom: idx < players.length - 1 ? '1px solid var(--border)' : undefined }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: 13 }}>{player.name}</div>
+                    {editingPlayerId === player.id ? (
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <input
+                          className="input"
+                          style={{ fontSize: 13, padding: '4px 8px', flex: 1 }}
+                          value={editNameVal}
+                          onChange={e => setEditNameVal(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') renamePlayer(player.id, editNameVal); if (e.key === 'Escape') setEditingPlayerId(null); }}
+                          autoFocus
+                        />
+                        <button className="btn btn-sm btn-primary" style={{ fontSize: 11 }} onClick={() => renamePlayer(player.id, editNameVal)}>Save</button>
+                        <button className="btn btn-sm btn-ghost" style={{ fontSize: 11 }} onClick={() => setEditingPlayerId(null)}>Cancel</button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ fontWeight: 600, fontSize: 13 }}>{player.name}</div>
+                        {isSuperAdmin && (
+                          <button
+                            onClick={() => { setEditingPlayerId(player.id); setEditNameVal(player.name); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 12, padding: '0 2px', lineHeight: 1 }}
+                            title="Rename player"
+                          >✏️</button>
+                        )}
+                      </div>
+                    )}
                     <div style={{ fontSize: 11, color: 'var(--text-3)', display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
                       <span>{player.createdAt ? new Date(player.createdAt.seconds * 1000).toLocaleDateString('en-GB') : 'unknown'}</span>
                       {showPins && <span style={{ color: 'var(--amber)', fontWeight: 700, letterSpacing: '0.1em', background: 'rgba(255,168,0,0.1)', padding: '1px 6px', borderRadius: 4 }}>PIN: {player.pin}</span>}

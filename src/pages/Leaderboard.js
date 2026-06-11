@@ -42,19 +42,39 @@ function FormStrip({ form }) {
   if (!form?.length) return null;
   const last5 = form.slice(-5);
   const colors = { E: 'var(--green)', R: 'var(--amber)', W: 'var(--red)', '-': 'var(--surface-3)' };
-  const labels = { E: 'S', R: 'R', W: '✗', '-': '-' };
-  const titles = { E: 'Correct score (S)', R: 'Correct result (R)', W: 'Wrong', '-': 'No prediction' };
+  const labels = { E: 'S', R: 'R', W: '\u2717', '-': '-' };
+  const titles = { E: 'Correct score', R: 'Correct result', W: 'Wrong', '-': 'No prediction' };
   return (
     <div style={{ display: 'flex', gap: 3 }}>
-      {last5.map((f, i) => (
-        <div key={i} title={titles[f]} style={{
-          width: 20, height: 20, borderRadius: 4, background: colors[f] || 'var(--surface-3)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 9, fontWeight: 700, color: f === 'E' ? '#000' : '#fff',
-        }}>
-          {labels[f]}
-        </div>
-      ))}
+      {last5.map((f, i) => {
+        const entry = typeof f === 'object' ? f : { r: f, s: false, b: false };
+        return (
+          <div key={i} title={titles[entry.r]} style={{ position: 'relative', width: 22, height: 22 }}>
+            <div style={{
+              width: 22, height: 22, borderRadius: 4,
+              background: colors[entry.r] || 'var(--surface-3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 9, fontWeight: 700,
+              color: entry.r === 'E' ? '#000' : entry.r === 'W' ? '#fff' : entry.r === 'R' ? '#000' : 'var(--text-2)',
+            }}>
+              {labels[entry.r]}
+            </div>
+            {entry.s && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4,
+                fontSize: 8, lineHeight: 1, pointerEvents: 'none',
+              }} title="Correct first goalscorer">\u26bd</span>
+            )}
+            {entry.b && (
+              <span style={{
+                position: 'absolute', top: -4, left: -4,
+                fontSize: 7, fontWeight: 900, lineHeight: 1,
+                color: 'var(--green)', pointerEvents: 'none',
+              }} title="GD bonus">B</span>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -138,14 +158,32 @@ export default function Leaderboard() {
           const correctResult = (homeWin && predHomeWin) || (awayWin && predAwayWin) || (draw && predDraw);
 
           let pts = 0;
-          if (correctScore) { pts += SCORING.EXACT_SCORE; users[uid].correctScores++; users[uid].form.push('E'); }
-          else if (correctResult) { pts += SCORING.CORRECT_RESULT; users[uid].correctResults++; users[uid].form.push('R'); }
-          else { users[uid].form.push('W'); }
-
+          const fe = { r: '-', s: false, b: false };
+          if (correctScore) {
+            pts += SCORING.EXACT_SCORE;
+            users[uid].correctScores++;
+            fe.r = 'E';
+          } else {
+            if (correctResult) {
+              pts += SCORING.CORRECT_RESULT;
+              users[uid].correctResults++;
+              fe.r = 'R';
+            } else {
+              fe.r = 'W';
+            }
+            const actualGD = result.home - result.away;
+            const predGD = Number(pred.homeScore) - Number(pred.awayScore);
+            if (!isNaN(predGD) && actualGD === predGD) {
+              pts += SCORING.GOAL_DIFFERENCE;
+              fe.b = true;
+            }
+          }
           if (result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer) {
             pts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
+            fe.s = true;
           }
+          users[uid].form.push(fe);
 
           users[uid].points += pts;
           cumulative += pts;
