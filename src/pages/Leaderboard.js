@@ -367,7 +367,7 @@ export default function Leaderboard() {
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-2)' }}>
           <span>⚽ top-right corner = correct 1st goalscorer</span>
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>B</span><span style={{ color: 'var(--text-2)', marginLeft: -10 }}> top-left corner = GD bonus</span>
-        </div></div>
+        </div>
 
 
       </div>
