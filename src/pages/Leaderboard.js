@@ -204,7 +204,6 @@ export default function Leaderboard() {
       });
 
       const sorted = Object.values(users)
-        .filter(u => predsByUser[u.id])
         .sort((a, b) => b.points - a.points);
 
       setPlayers(sorted);
@@ -352,7 +351,7 @@ export default function Leaderboard() {
       {/* Tap hint + form key */}
       <div className="card" style={{ marginTop: 16, padding: '12px 16px' }}>
         <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10 }}>
-          💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their position chart and match-by-match stats
+          💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their position chart and stat totals
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key · <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>last 5 matches</span></p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12, marginBottom: 10 }}>
