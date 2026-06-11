@@ -6,38 +6,48 @@ import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES, SCORING } from '../data/fixtures';
 
 // Mini sparkline component for points progression
-function PointsGraph({ history }) {
-  if (!history || history.length < 2) return <p style={{ fontSize: 12, color: 'var(--text-3)', padding: '12px 0' }}>Not enough data yet</p>;
-  const max = Math.max(...history.map(h => h.cumulative), 1);
-  const w = 280, h = 60, pad = 4;
-  const pts = history.map((h, i) => ({
-    x: pad + (i / (history.length - 1)) * (w - pad * 2),
-    y: h + pad + ((max - h.cumulative) / max) * (h - pad * 2),
+function PositionGraph({ playerId, allPlayers }) {
+  const maxLen = Math.max(...allPlayers.map(p => p.history.length), 0);
+  if (maxLen < 2) return <p style={{ fontSize: 12, color: 'var(--text-3)', padding: '12px 0 4px' }}>Position chart loads after first results are in</p>;
+  const n = allPlayers.length;
+  const w = 280, h = 60, pad = 8;
+  // Compute rank at each match index
+  const positions = [];
+  for (let i = 0; i < maxLen; i++) {
+    const snap = allPlayers.map(p => ({
+      id: p.id,
+      pts: p.history[i]?.cumulative ?? (p.history[p.history.length - 1]?.cumulative ?? 0),
+    })).sort((a, b) => b.pts - a.pts);
+    const rank = snap.findIndex(s => s.id === playerId) + 1 || n;
+    positions.push(rank);
+  }
+  // SVG: rank 1 = top (low y), rank n = bottom (high y)
+  const pts = positions.map((rank, i) => ({
+    x: pad + (i / (maxLen - 1)) * (w - pad * 2),
+    y: n === 1 ? h / 2 : pad + ((rank - 1) / (n - 1)) * (h - pad * 2),
   }));
-  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const curRank = positions[positions.length - 1];
   return (
     <div style={{ padding: '12px 0 4px' }}>
-      <p style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Points progression</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+        <p style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Position in league</p>
+        <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 16, color: 'var(--green)' }}>#{curRank} of {n}</span>
+      </div>
       <svg viewBox={`0 0 ${w} ${h}`} style={{ width: '100%', height: 60 }}>
-        <defs>
-          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="var(--green)" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="var(--green)" stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        <path d={path} fill="none" stroke="url(#lineGrad)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={path} fill="none" stroke="var(--green)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {pts.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r="3" fill="var(--green)" />
         ))}
       </svg>
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-3)', marginTop: 2 }}>
-        <span>Start</span><span>Now</span>
+        <span>Match 1</span><span>Latest</span>
       </div>
     </div>
   );
 }
 
-// Form strip — last 5 match outcomes
+
 function FormStrip({ form }) {
   if (!form?.length) return null;
   const last5 = form.slice(-5);
@@ -264,13 +274,13 @@ export default function Leaderboard() {
 
               {isExpanded && (
                 <div style={{ padding: '4px 14px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
-                  <PointsGraph history={player.history} />
+                  <PositionGraph playerId={player.id} allPlayers={playerList} />
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
                     {[
-                      { label: 'Score', value: player.correctScores },
-                      { label: 'GD bonus', value: player.gdBonus ?? 0 },
-                      { label: 'Result', value: player.correctResults },
-                      { label: '1st scorer', value: player.scorerHits ?? 0 },
+                      { label: 'Correct scores', value: player.correctScores },
+                      { label: 'GD bonuses', value: player.gdBonus ?? 0 },
+                      { label: 'Correct results', value: player.correctResults },
+                      { label: '1st scorers', value: player.scorerHits ?? 0 },
                     ].map(s => (
                       <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
                         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)' }}>{s.value}</div>
@@ -342,7 +352,7 @@ export default function Leaderboard() {
       {/* Tap hint + form key */}
       <div className="card" style={{ marginTop: 16, padding: '12px 16px' }}>
         <p style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 10 }}>
-          💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their points progression graph and match-by-match stats
+          💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their position chart and match-by-match stats
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key · <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>last 5 matches</span></p>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12, marginBottom: 10 }}>
@@ -353,23 +363,11 @@ export default function Leaderboard() {
             </div>
           ))}
         </div>
-        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bonus badges</p>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ position: 'relative', width: 22, height: 22 }}>
-              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>R</div>
-              <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 9 }}>\u26bd</span>
-            </div>
-            <span style={{ color: 'var(--text-2)' }}>⚽ top-right = correct 1st goalscorer</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ position: 'relative', width: 22, height: 22 }}>
-              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>\u2717</div>
-              <span style={{ position: 'absolute', top: -4, left: -4, fontSize: 7, fontWeight: 900, color: 'var(--green)' }}>B</span>
-            </div>
-            <span style={{ color: 'var(--text-2)' }}>B top-left = GD bonus earned</span>
-          </div>
-        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bonus badges on chips</p>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-2)' }}>
+          <span>⚽ top-right corner = correct 1st goalscorer</span>
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>B</span><span style={{ color: 'var(--text-2)', marginLeft: -10 }}> top-left corner = GD bonus</span>
+        </div></div>
 
 
       </div>
