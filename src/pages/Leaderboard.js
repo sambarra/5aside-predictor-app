@@ -100,7 +100,7 @@ export default function Leaderboard() {
       ]);
 
       const users = {};
-      usersSnap.forEach(d => { users[d.id] = { ...d.data(), id: d.id, points: 0, correctScores: 0, correctResults: 0, scorerPts: 0, form: [], history: [] }; });
+      usersSnap.forEach(d => { users[d.id] = { ...d.data(), id: d.id, points: 0, correctScores: 0, correctResults: 0, scorerPts: 0, gdBonus: 0, scorerHits: 0, form: [], history: [] }; });
 
       const results = {};
       resultsSnap.forEach(d => { results[d.id] = d.data(); });
@@ -176,11 +176,13 @@ export default function Leaderboard() {
             if (!isNaN(predGD) && actualGD === predGD) {
               pts += SCORING.GOAL_DIFFERENCE;
               fe.b = true;
+              users[uid].gdBonus++;
             }
           }
           if (result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer) {
             pts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
+            users[uid].scorerHits++;
             fe.s = true;
           }
           users[uid].form.push(fe);
@@ -263,13 +265,14 @@ export default function Leaderboard() {
               {isExpanded && (
                 <div style={{ padding: '4px 14px 14px', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
                   <PointsGraph history={player.history} />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
                     {[
-                      { label: 'Total pts', value: player.points },
-                      { label: 'Correct scores', value: player.correctScores },
-                      { label: 'Scorer pts', value: player.scorerPts },
+                      { label: 'Score', value: player.correctScores },
+                      { label: 'GD bonus', value: player.gdBonus ?? 0 },
+                      { label: 'Result', value: player.correctResults },
+                      { label: '1st scorer', value: player.scorerHits ?? 0 },
                     ].map(s => (
-                      <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 10px', textAlign: 'center' }}>
+                      <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
                         <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)' }}>{s.value}</div>
                         <div style={{ fontSize: 10, color: 'var(--text-3)' }}>{s.label}</div>
                       </div>
@@ -342,13 +345,30 @@ export default function Leaderboard() {
           💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their points progression graph and match-by-match stats
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key · <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>last 5 matches</span></p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12 }}>
-          {[['S', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['✗', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12, marginBottom: 10 }}>
+          {[['S', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['\u2717', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ width: 20, height: 20, borderRadius: 4, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color, flexShrink: 0 }}>{label}</div>
               <span style={{ color: 'var(--text-2)' }}>{desc}</span>
             </div>
           ))}
+        </div>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bonus badges</p>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ position: 'relative', width: 22, height: 22 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>R</div>
+              <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 9 }}>\u26bd</span>
+            </div>
+            <span style={{ color: 'var(--text-2)' }}>⚽ top-right = correct 1st goalscorer</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ position: 'relative', width: 22, height: 22 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>\u2717</div>
+              <span style={{ position: 'absolute', top: -4, left: -4, fontSize: 7, fontWeight: 900, color: 'var(--green)' }}>B</span>
+            </div>
+            <span style={{ color: 'var(--text-2)' }}>B top-left = GD bonus earned</span>
+          </div>
         </div>
 
 
