@@ -189,7 +189,9 @@ export default function Leaderboard() {
               users[uid].gdBonus++;
             }
           }
-          if (result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer) {
+          const noScorerMatch = !result.firstGoalscorer && pred.firstGoalscorer === 'No goalscorer';
+          const scorerMatch = result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer;
+          if (noScorerMatch || scorerMatch) {
             pts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerHits++;

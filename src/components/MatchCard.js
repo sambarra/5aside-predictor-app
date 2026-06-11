@@ -57,7 +57,9 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     if (correctScore) pts += SCORING.EXACT_SCORE;
     else if (correctResult) pts += SCORING.CORRECT_RESULT;
     if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
-    if (fixture.result.firstGoalscorer && prediction.firstGoalscorer === fixture.result.firstGoalscorer) pts += SCORING.FIRST_GOALSCORER;
+    const noScorerMatch = !fixture.result.firstGoalscorer && prediction.firstGoalscorer === 'No goalscorer';
+    const scorerMatch = fixture.result.firstGoalscorer && prediction.firstGoalscorer === fixture.result.firstGoalscorer;
+    if (noScorerMatch || scorerMatch) pts += SCORING.FIRST_GOALSCORER;
     const finalPts = boosterApplied ? pts * 2 : pts;
     return { pts: finalPts, rawPts: pts, correctScore, correctResult, correctGD, boosted: boosterApplied && pts > 0 };
   }
@@ -163,6 +165,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
                 style={{ flex: 1 }}
               >
                 <option value="">Pick a player...</option>
+                <option value="No goalscorer">🚫 No goalscorer</option>
                 <optgroup label={`⚽ ${fixture.home}`}>
                   {getSquadOrdered(fixture.home).map(p => (
                     <option key={p.name} value={p.name}>[{p.pos}] {p.name}</option>
