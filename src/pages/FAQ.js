@@ -69,7 +69,7 @@ const FAQS = [
   },
   {
     q: 'When are scores updated?',
-    a: 'Results update automatically once per day at midnight UK time. If an admin is watching the matches they may update results sooner using the manual refresh button in the Admin panel.',
+    a: 'Results update automatically twice a day — at 4am and 11am UK time — to catch all overnight and late-evening games. If an admin is watching a match they can update results immediately using the manual refresh button in the Admin panel.',
   },
 ];
 

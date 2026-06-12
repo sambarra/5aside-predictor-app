@@ -77,10 +77,13 @@ function FormStrip({ form }) {
             )}
             {entry.b && (
               <span style={{
-                position: 'absolute', top: -4, left: -4,
-                fontSize: 7, fontWeight: 900, lineHeight: 1,
-                color: 'var(--green)', pointerEvents: 'none',
-              }} title="GD bonus">B</span>
+                position: 'absolute', top: -5, left: -5,
+                fontSize: 8, fontWeight: 900, lineHeight: 1,
+                color: '#000', background: 'var(--green)',
+                borderRadius: '50%', width: 11, height: 11,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                pointerEvents: 'none',
+              }} title="GD bonus">±</span>
             )}
           </div>
         );
@@ -360,7 +363,7 @@ export default function Leaderboard() {
           {[
             { label: 'S', bg: 'var(--green)', color: '#000', desc: 'Correct score' },
             { label: 'R', bg: 'var(--amber)', color: '#000', desc: 'Correct result' },
-            { label: '\u2717', bg: 'var(--red)', color: '#fff', desc: 'Wrong' },
+            { label: '✗', bg: 'var(--red)', color: '#fff', desc: 'Wrong' },
             { label: '-', bg: 'var(--surface-3)', color: 'var(--text-3)', desc: 'No prediction' },
           ].map(({ label, bg, color, desc }) => (
             <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

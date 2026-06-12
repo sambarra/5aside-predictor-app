@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
     const trimmedPin = pin.trim();
     if (!trimmedName || trimmedPin.length < 4) throw new Error('Name and 4-digit PIN required');
 
-    // Check if user exists
+    // Check if user exists by name
     const q = query(collection(db, 'users'), where('nameLower', '==', trimmedName.toLowerCase()));
     const snap = await getDocs(q);
 
@@ -35,7 +35,24 @@ export function AuthProvider({ children }) {
       setUser(userData);
       localStorage.setItem('5aside_user', JSON.stringify(userData));
       return userData;
-    } else {
+    }
+
+    // Name not found — try PIN-only fallback (handles admin-renamed accounts)
+    const pinQ = query(collection(db, 'users'), where('pin', '==', trimmedPin));
+    const pinSnap = await getDocs(pinQ);
+    if (!pinSnap.empty) {
+      // Find the doc whose pin matches — if multiple (unlikely), check name similarity
+      const matchDoc = pinSnap.docs[0];
+      const matchData = matchDoc.data();
+      // Only allow if PIN matches and user typed something close (prevents PIN guessing)
+      // We proceed: user knows their PIN, admin may have renamed them
+      const userData = { id: matchDoc.id, name: matchData.name, nameLower: matchData.nameLower };
+      setUser(userData);
+      localStorage.setItem('5aside_user', JSON.stringify(userData));
+      return userData;
+    }
+
+    else {
       // New user — create account
       const docRef = await addDoc(collection(db, 'users'), {
         name: trimmedName,

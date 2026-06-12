@@ -655,7 +655,7 @@ export default function Admin({ onBack }) {
   async function renamePlayer(playerId, newName) {
     if (!newName.trim()) return;
     try {
-      await updateDoc(doc(db, 'users', playerId), { name: newName.trim() });
+      await updateDoc(doc(db, 'users', playerId), { name: newName.trim(), nameLower: newName.trim().toLowerCase() });
       setPlayers(prev => prev.map(p => p.id === playerId ? { ...p, name: newName.trim() } : p));
       setEditingPlayerId(null);
     } catch (err) {
