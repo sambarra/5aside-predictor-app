@@ -356,18 +356,37 @@ export default function Leaderboard() {
           💡 <strong style={{ color: 'var(--text)' }}>Tap any player</strong> to see their position chart and stat totals
         </p>
         <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Form key · <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>last 5 matches</span></p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', fontSize: 12, marginBottom: 10 }}>
-          {[['S', 'var(--green)', '#000', 'Correct score'], ['R', 'var(--amber)', '#fff', 'Correct result'], ['\u2717', 'var(--red)', '#fff', 'Wrong'], ['-', 'var(--surface-3)', 'var(--text-3)', 'No prediction']].map(([label, bg, color, desc]) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div style={{ width: 20, height: 20, borderRadius: 4, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color, flexShrink: 0 }}>{label}</div>
-              <span style={{ color: 'var(--text-2)' }}>{desc}</span>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+          {[
+            { label: 'S', bg: 'var(--green)', color: '#000', desc: 'Correct score' },
+            { label: 'R', bg: 'var(--amber)', color: '#000', desc: 'Correct result' },
+            { label: '\u2717', bg: 'var(--red)', color: '#fff', desc: 'Wrong' },
+            { label: '-', bg: 'var(--surface-3)', color: 'var(--text-3)', desc: 'No prediction' },
+          ].map(({ label, bg, color, desc }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
+                <div style={{ width: 22, height: 22, borderRadius: 4, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color }}>{label}</div>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{desc}</span>
             </div>
           ))}
         </div>
-        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 6, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bonus badges on chips</p>
-        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12, color: 'var(--text-2)' }}>
-          <span>⚽ top-right corner = correct 1st goalscorer</span>
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>B</span><span style={{ color: 'var(--text-2)', marginLeft: -10 }}> top-left corner = GD bonus</span>
+        <p style={{ fontSize: 11, color: 'var(--text-2)', marginBottom: 8, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Bonus badges</p>
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--amber)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#000' }}>R</div>
+              <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 9, lineHeight: 1 }}>⚽</span>
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Correct 1st goalscorer</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>\u2717</div>
+              <span style={{ position: 'absolute', top: -4, left: -4, fontSize: 7, fontWeight: 900, color: 'var(--green)', lineHeight: 1 }}>B</span>
+            </div>
+            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>GD bonus</span>
+          </div>
         </div>
 
 

@@ -8,7 +8,7 @@ import { SQUADS, getSquadOrdered } from '../data/squads';
 
 // Golden boot players now come from SQUADS data
 
-const DEADLINE = new Date('2026-06-11T19:55:00+01:00'); // 5 mins before first match 20:00 BST
+const DEADLINE = new Date('2026-06-13T00:00:00+01:00'); // Midnight end of Friday 12 June BST
 
 // Searchable player picker for Golden Boot
 function PlayerSearch({ value, onChange, disabled }) {

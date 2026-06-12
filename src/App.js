@@ -39,7 +39,7 @@ const IconMore = () => (
 );
 
 const TABS = [
-  { id: 'fixtures', label: 'Predict', Icon: IconFixtures },
+  { id: 'fixtures', label: 'Matches', Icon: IconFixtures },
   { id: 'tournament', label: 'Tournament', Icon: IconTrophy },
   { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
 ];
