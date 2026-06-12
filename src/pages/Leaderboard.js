@@ -279,8 +279,8 @@ export default function Leaderboard() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
                     {[
                       { label: 'Correct scores', value: player.correctScores },
-                      { label: 'GD bonuses', value: player.gdBonus ?? 0 },
                       { label: 'Correct results', value: player.correctResults },
+                      { label: 'GD bonuses', value: player.gdBonus ?? 0 },
                       { label: '1st scorers', value: player.scorerHits ?? 0 },
                     ].map(s => (
                       <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
@@ -322,7 +322,7 @@ export default function Leaderboard() {
         <div className="card card-green-border" style={{ marginBottom: 16, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your position</div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginTop: 2 }}>{user.name}</div>
+            <div style={{ fontWeight: 700, fontSize: 15, marginTop: 2 }}>{players.find(p => p.id === user.id)?.name || user.name}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 28, color: 'var(--green)', lineHeight: 1 }}>#{myRank}</div>

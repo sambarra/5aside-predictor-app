@@ -372,6 +372,8 @@ function LeaguesAdminTab({ db }) {
   const [leagues, setLeagues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
+  const [editingLeagueId, setEditingLeagueId] = useState(null);
+  const [editLeagueName, setEditLeagueName] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -409,6 +411,18 @@ function LeaguesAdminTab({ db }) {
 
   if (loading) return <p style={{ color: 'var(--text-2)', fontSize: 13, padding: '8px 0' }}>Loading leagues...</p>;
 
+    async function renameLeague(leagueId, newName) {
+    if (!newName.trim()) return;
+    try {
+      await updateDoc(doc(db, 'leagues', leagueId), { name: newName.trim() });
+      setLeagues(prev => prev.map(l => l.id === leagueId ? { ...l, name: newName.trim() } : l));
+      setEditingLeagueId(null);
+      setMsg('\u2713 Renamed successfully');
+    } catch (err) {
+      setMsg('\u274c Error: ' + err.message);
+    }
+  }
+
   return (
     <div>
       <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 14 }}>
@@ -424,7 +438,25 @@ function LeaguesAdminTab({ db }) {
             borderBottom: idx < leagues.length - 1 ? '1px solid var(--border)' : undefined,
           }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 13 }}>{league.name}</div>
+              {editingLeagueId === league.id ? (
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginBottom: 4 }}>
+                  <input className="input" style={{ fontSize: 13, padding: '4px 8px', flex: 1 }}
+                    value={editLeagueName}
+                    onChange={e => setEditLeagueName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') renameLeague(league.id, editLeagueName); if (e.key === 'Escape') setEditingLeagueId(null); }}
+                    autoFocus
+                  />
+                  <button className="btn btn-sm btn-primary" style={{ fontSize: 11 }} onClick={() => renameLeague(league.id, editLeagueName)}>Save</button>
+                  <button className="btn btn-sm btn-ghost" style={{ fontSize: 11 }} onClick={() => setEditingLeagueId(null)}>Cancel</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>{league.name}</span>
+                  <button onClick={() => { setEditingLeagueId(league.id); setEditLeagueName(league.name); }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 12, padding: '0 2px' }}
+                    title="Rename league">✏️</button>
+                </div>
+              )}
               <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>
                 Code: <span style={{ color: 'var(--green)', fontWeight: 700 }}>{league.code}</span>
                 {league.createdBy && <span style={{ marginLeft: 8 }}>\u00b7 {league.createdBy}</span>}
