@@ -375,7 +375,7 @@ export default function Leaderboard() {
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
-              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--red)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#fff' }}>✗</div>
+              <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--surface-3)' }}></div>
               <span style={{ position: 'absolute', top: -5, left: -5, fontSize: 9, lineHeight: 1 }}>🤏</span>
             </div>
             <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Goal difference bonus</span>
