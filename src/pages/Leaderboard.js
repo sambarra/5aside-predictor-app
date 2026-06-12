@@ -79,9 +79,9 @@ function FormStrip({ form }) {
               <span style={{
                 position: 'absolute', top: -6, left: -6,
                 width: 13, height: 13, borderRadius: '50%',
-                background: '#fff',
+                background: '#141414',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 8, lineHeight: 1, pointerEvents: 'none',
+                fontSize: 11, lineHeight: 1, pointerEvents: 'none',
               }} title="Goal difference bonus">🤏</span>
             )}
           </div>
@@ -378,7 +378,7 @@ export default function Leaderboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
               <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--surface-3)' }}></div>
-              <span style={{ position: 'absolute', top: -6, left: -6, width: 13, height: 13, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, lineHeight: 1 }}>🤏</span>
+              <span style={{ position: 'absolute', top: -6, left: -6, width: 13, height: 13, borderRadius: '50%', background: '#141414', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, lineHeight: 1 }}>🤏</span>
             </div>
             <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Goal Difference Bonus</span>
           </div>
