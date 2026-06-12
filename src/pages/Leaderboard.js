@@ -79,9 +79,9 @@ function FormStrip({ form }) {
               <span style={{
                 position: 'absolute', top: -6, left: -6,
                 width: 13, height: 13, borderRadius: '50%',
-                background: '#141414',
+                background: '#141414', border: '1.5px solid #282828',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 11, lineHeight: 1, pointerEvents: 'none',
+                fontSize: 9, lineHeight: 1, pointerEvents: 'none',
               }} title="Goal difference bonus">🤏</span>
             )}
           </div>
@@ -218,8 +218,6 @@ export default function Leaderboard() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const myRank = players.findIndex(p => p.id === user.id) + 1;
-
   function renderTable(playerList, showRank = true) {
     if (playerList.length === 0) {
       return (
@@ -312,6 +310,7 @@ export default function Leaderboard() {
   const displayPlayers = activeLeague
     ? players.filter(p => activeLeague.memberIds?.includes(p.id))
     : players;
+  const myRank = displayPlayers.findIndex(p => p.id === user.id) + 1;
 
   if (loading) return <div className="page"><p style={{ color: 'var(--text-2)' }}>Calculating standings...</p></div>;
 
@@ -323,7 +322,7 @@ export default function Leaderboard() {
       {myRank > 0 && (
         <div className="card card-green-border" style={{ marginBottom: 16, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your position</div>
+            <div style={{ fontSize: 11, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{activeLeague ? 'Your League Position' : 'Your Position'}</div>
             <div style={{ fontWeight: 700, fontSize: 15, marginTop: 2 }}>{players.find(p => p.id === user.id)?.name || user.name}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -378,7 +377,7 @@ export default function Leaderboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
               <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--surface-3)' }}></div>
-              <span style={{ position: 'absolute', top: -6, left: -6, width: 13, height: 13, borderRadius: '50%', background: '#141414', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, lineHeight: 1 }}>🤏</span>
+              <span style={{ position: 'absolute', top: -6, left: -6, width: 13, height: 13, borderRadius: '50%', background: '#141414', border: '1.5px solid #282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, lineHeight: 1 }}>🤏</span>
             </div>
             <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Goal Difference Bonus</span>
           </div>
