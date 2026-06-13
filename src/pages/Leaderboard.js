@@ -224,8 +224,8 @@ export default function Leaderboard() {
     const maxLen = Math.max(...playerList.map(p => p.history.length), 0);
     if (maxLen >= 2) {
       const prevPts = playerList
-        .map(p => ({ id: p.id, pts: p.history[p.history.length - 2]?.cumulative ?? 0 }))
-        .sort((a, b) => b.pts - a.pts);
+        .map((p, i) => ({ id: p.id, pts: p.history[p.history.length - 2]?.cumulative ?? 0, origIdx: i }))
+        .sort((a, b) => b.pts - a.pts || a.origIdx - b.origIdx);
       prevPts.forEach((p, i) => { prevRankMap[p.id] = i + 1; });
     }
 
@@ -243,12 +243,18 @@ export default function Leaderboard() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header row */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '32px 1fr 44px 80px',
+          display: 'grid', gridTemplateColumns: '42px 1fr 52px 90px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
           {['#', 'Player', 'Pts', 'Form'].map((h, i) => (
-            <span key={h} style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: i > 1 ? 'center' : 'left' }}>{h}</span>
+            <span key={h} style={{
+              fontSize: 10, color: 'var(--text-3)', fontWeight: 700,
+              textTransform: 'uppercase', letterSpacing: '0.05em',
+              textAlign: i === 2 ? 'center' : i === 3 ? 'center' : 'left',
+              borderLeft: i === 3 ? '1px solid var(--border)' : undefined,
+              paddingLeft: i === 3 ? 8 : undefined,
+            }}>{h}</span>
           ))}
         </div>
 
@@ -256,37 +262,46 @@ export default function Leaderboard() {
           const rank = showRank ? idx + 1 : playerList.findIndex(p => p.id === player.id) + 1;
           const isMe = player.id === user.id;
           const isExpanded = expanded === player.id;
+          // Movement: only show if player has >= 2 results (meaningful comparison)
+          const hasPrevData = player.history.length >= 2;
+          const movArrow = (() => {
+            if (!hasPrevData || !prevRankMap[player.id]) return null;
+            const curr = idx + 1;
+            const diff = prevRankMap[player.id] - curr;
+            if (diff > 0) return { label: `▲${diff}`, color: 'var(--green)' };
+            if (diff < 0) return { label: `▼${Math.abs(diff)}`, color: 'var(--red)' };
+            return { label: '—', color: 'var(--text-3)' };
+          })();
 
           return (
             <div key={player.id}>
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '32px 1fr 44px 80px',
-                  padding: '11px 14px', borderBottom: '1px solid var(--border)',
+                  display: 'grid', gridTemplateColumns: '42px 1fr 52px 90px',
+                  padding: '10px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
                   transition: 'background 0.1s',
                 }}
               >
-                <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)' }}>
-                  {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                {/* Rank + movement indicator stacked */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
+                    {rank}
+                  </span>
+                  {movArrow && (
+                    <span style={{ fontSize: 9, fontWeight: 700, color: movArrow.color, lineHeight: 1, marginTop: 2 }}>
+                      {movArrow.label}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 4 }}>you</span>}
-                  {(() => {
-                    const prev = prevRankMap[player.id];
-                    if (!prev) return null;
-                    const curr = playerList.indexOf(player) + 1;
-                    const diff = prev - curr;
-                    if (diff > 0) return <span style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>▲{diff}</span>;
-                    if (diff < 0) return <span style={{ fontSize: 10, color: 'var(--red)', fontWeight: 700 }}>▼{Math.abs(diff)}</span>;
-                    return <span style={{ fontSize: 10, color: 'var(--text-3)' }}>—</span>;
-                  })()}
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 8 }}>
                   <FormStrip form={player.form} />
                 </div>
               </div>
