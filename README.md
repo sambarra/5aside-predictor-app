@@ -1,4 +1,4 @@
-# 5aside WC26 Predictor
+# 5aside WC26 Predictor 
 
 World Cup 2026 prediction app for predictor.5aside.com — WC26
 
