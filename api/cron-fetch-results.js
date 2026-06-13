@@ -96,9 +96,11 @@ function matchTeamName(ourName, apiName) {
 }
 
 export default async function handler(req, res) {
-  // Verify this is called by Vercel cron (or admin manually)
+  // Allow Vercel cron (GET) and manual admin calls (POST)
+  // If CRON_SECRET is set, verify it; if not set, allow all (for Vercel hobby crons)
   const authHeader = req.headers['authorization'];
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && req.method !== 'POST') {
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}` && req.method !== 'POST') {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 

@@ -219,6 +219,16 @@ export default function Leaderboard() {
   useEffect(() => { loadData(); }, [loadData]);
 
   function renderTable(playerList, showRank = true) {
+    // Calculate previous rank (before last match result) for movement arrows
+    const prevRankMap = {};
+    const maxLen = Math.max(...playerList.map(p => p.history.length), 0);
+    if (maxLen >= 2) {
+      const prevPts = playerList
+        .map(p => ({ id: p.id, pts: p.history[p.history.length - 2]?.cumulative ?? 0 }))
+        .sort((a, b) => b.pts - a.pts);
+      prevPts.forEach((p, i) => { prevRankMap[p.id] = i + 1; });
+    }
+
     if (playerList.length === 0) {
       return (
         <div className="empty-state">
@@ -262,10 +272,18 @@ export default function Leaderboard() {
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)' }}>
                   {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
                 </span>
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
-                  {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 6 }}>you</span>}
-
+                  {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 4 }}>you</span>}
+                  {(() => {
+                    const prev = prevRankMap[player.id];
+                    if (!prev) return null;
+                    const curr = playerList.indexOf(player) + 1;
+                    const diff = prev - curr;
+                    if (diff > 0) return <span style={{ fontSize: 10, color: 'var(--green)', fontWeight: 700 }}>▲{diff}</span>;
+                    if (diff < 0) return <span style={{ fontSize: 10, color: 'var(--red)', fontWeight: 700 }}>▼{Math.abs(diff)}</span>;
+                    return <span style={{ fontSize: 10, color: 'var(--text-3)' }}>—</span>;
+                  })()}
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -316,7 +334,7 @@ export default function Leaderboard() {
 
   return (
     <div className="page">
-      <h1 className="page-title">📊 Standings</h1>
+      <h1 className="page-title">📊 Rankings</h1>
 
       {/* My position card */}
       {myRank > 0 && (

@@ -107,7 +107,7 @@ export default function Fixtures() {
     <div className="page">
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 className="page-title">⚽ Fixtures</h1>
+        <h1 className="page-title">⚽ Match Predictions</h1>
         <p className="page-sub">World Cup 2026 · Group Stage</p>
 
         {/* Progress */}

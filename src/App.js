@@ -41,7 +41,7 @@ const IconMore = () => (
 const TABS = [
   { id: 'fixtures', label: 'Matches', Icon: IconFixtures },
   { id: 'tournament', label: 'Tournament', Icon: IconTrophy },
-  { id: 'leaderboard', label: 'Standings', Icon: IconLeaderboard },
+  { id: 'leaderboard', label: 'Rankings', Icon: IconLeaderboard },
 ];
 
 function MoreMenu({ onAdmin, onFAQ, onLeagues, onClose }) {
