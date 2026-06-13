@@ -55,7 +55,7 @@ function FormStrip({ form }) {
   const labels = { E: 'S', R: 'R', W: '\u2717', '-': '-' };
   const titles = { E: 'Correct score', R: 'Correct result', W: 'Wrong', '-': 'No prediction' };
   return (
-    <div style={{ display: 'flex', gap: 3 }}>
+    <div style={{ display: 'flex', gap: 5 }}>
       {last5.map((f, i) => {
         const entry = typeof f === 'object' ? f : { r: f, s: false, b: false };
         return (
@@ -248,13 +248,12 @@ export default function Leaderboard() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header row — 5 columns: move | # | player | pts | form */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '30px 20px 1fr 52px 104px',
+          display: 'grid', gridTemplateColumns: '48px 1fr 52px 114px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
           {[
-            { label: '#', align: 'center' },
-            { label: '', align: 'center' },
+            { label: '#', align: 'left' },
             { label: 'Player', align: 'left' },
             { label: 'Pts', align: 'center' },
             { label: 'Form', align: 'center', borderLeft: true },
@@ -288,21 +287,18 @@ export default function Leaderboard() {
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '30px 20px 1fr 52px 104px',
+                  display: 'grid', gridTemplateColumns: '48px 1fr 52px 114px',
                   padding: '11px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
                   transition: 'background 0.1s',
                 }}
               >
-                {/* Rank column — first */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                {/* Rank + movement — single unit, left-aligned */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
                     {rank}
                   </span>
-                </div>
-                {/* Movement column — second */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   {movArrow && (
                     <span style={{ fontSize: movArrow.label === '◆' ? 7 : 8, fontWeight: 800, color: movArrow.color, lineHeight: 1 }}>
                       {movArrow.label}
