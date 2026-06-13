@@ -219,11 +219,14 @@ export default function Leaderboard() {
   useEffect(() => { loadData(); }, [loadData]);
 
   function renderTable(playerList, showRank = true) {
-    // Calculate previous rank (before last match result) for movement arrows
+    // Movement arrows: compare rank ONLY among players with >= 2 results
+    // This avoids distortion from 0-prediction players sitting in the pool
+    const activePlayers = playerList.filter(p => p.history.length >= 2);
     const prevRankMap = {};
-    const maxLen = Math.max(...playerList.map(p => p.history.length), 0);
-    if (maxLen >= 2) {
-      const prevPts = playerList
+    const currRankActive = {}; // rank within active-players subset
+    activePlayers.forEach((p, i) => { currRankActive[p.id] = i + 1; });
+    if (activePlayers.length >= 2) {
+      const prevPts = activePlayers
         .map((p, i) => ({ id: p.id, pts: p.history[p.history.length - 2]?.cumulative ?? 0, origIdx: i }))
         .sort((a, b) => b.pts - a.pts || a.origIdx - b.origIdx);
       prevPts.forEach((p, i) => { prevRankMap[p.id] = i + 1; });
@@ -262,15 +265,14 @@ export default function Leaderboard() {
           const rank = showRank ? idx + 1 : playerList.findIndex(p => p.id === player.id) + 1;
           const isMe = player.id === user.id;
           const isExpanded = expanded === player.id;
-          // Movement: only show if player has >= 2 results (meaningful comparison)
+          // Movement: rank change within active players since last match
           const hasPrevData = player.history.length >= 2;
           const movArrow = (() => {
-            if (!hasPrevData || !prevRankMap[player.id]) return null;
-            const curr = idx + 1;
-            const diff = prevRankMap[player.id] - curr;
+            if (!hasPrevData || !prevRankMap[player.id] || !currRankActive[player.id]) return null;
+            const diff = prevRankMap[player.id] - currRankActive[player.id];
             if (diff > 0) return { label: `▲${diff}`, color: 'var(--green)' };
             if (diff < 0) return { label: `▼${Math.abs(diff)}`, color: 'var(--red)' };
-            return null; // no change — don't show anything
+            return { label: '◆', color: 'var(--text-3)' }; // no change — diamond neutral
           })();
 
           return (
@@ -287,8 +289,8 @@ export default function Leaderboard() {
               >
                 {/* Rank + movement indicator — arrow left, number right */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {movArrow && movArrow.label !== '—' && (
-                    <span style={{ fontSize: 8, fontWeight: 800, color: movArrow.color, lineHeight: 1, minWidth: 14, textAlign: 'right' }}>
+                  {movArrow && (
+                    <span style={{ fontSize: movArrow.label === '◆' ? 7 : 8, fontWeight: 800, color: movArrow.color, lineHeight: 1, minWidth: 14, textAlign: 'right' }}>
                       {movArrow.label}
                     </span>
                   )}
