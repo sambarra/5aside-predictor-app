@@ -67,7 +67,7 @@ export default function Login() {
               onChange={e => setName(e.target.value)}
               autoComplete="off"
               autoCapitalize="off"
-              maxLength={30}
+              maxLength={20}
               style={{ fontSize: 16 }}
             />
             <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5, paddingLeft: 2 }}>

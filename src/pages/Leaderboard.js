@@ -248,13 +248,13 @@ export default function Leaderboard() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header row — 5 columns: move | # | player | pts | form */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '28px 32px 1fr 56px 96px',
+          display: 'grid', gridTemplateColumns: '30px 20px 1fr 52px 104px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
           {[
-            { label: '', align: 'center' },
             { label: '#', align: 'center' },
+            { label: '', align: 'center' },
             { label: 'Player', align: 'left' },
             { label: 'Pts', align: 'center' },
             { label: 'Form', align: 'center', borderLeft: true },
@@ -264,7 +264,7 @@ export default function Leaderboard() {
               textTransform: 'uppercase', letterSpacing: '0.05em',
               textAlign: align,
               borderLeft: borderLeft ? '1px solid var(--border)' : undefined,
-              paddingLeft: borderLeft ? 10 : undefined,
+              paddingLeft: borderLeft ? 8 : undefined,
             }}>{label}</span>
           ))}
         </div>
@@ -288,33 +288,33 @@ export default function Leaderboard() {
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '28px 32px 1fr 56px 96px',
+                  display: 'grid', gridTemplateColumns: '30px 20px 1fr 52px 104px',
                   padding: '11px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
                   transition: 'background 0.1s',
                 }}
               >
-                {/* Movement column — own separate cell */}
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  {movArrow && (
-                    <span style={{ fontSize: movArrow.label === '◆' ? 8 : 9, fontWeight: 800, color: movArrow.color, lineHeight: 1 }}>
-                      {movArrow.label}
-                    </span>
-                  )}
-                </div>
-                {/* Rank column */}
+                {/* Rank column — first */}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                   <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
                     {rank}
                   </span>
                 </div>
+                {/* Movement column — second */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {movArrow && (
+                    <span style={{ fontSize: movArrow.label === '◆' ? 7 : 8, fontWeight: 800, color: movArrow.color, lineHeight: 1 }}>
+                      {movArrow.label}
+                    </span>
+                  )}
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
+                  <span style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', maxWidth: '100%', display: 'block' }}>{player.name}</span>
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 4 }}>you</span>}
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
-                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 8, paddingTop: 4, paddingBottom: 4, overflow: 'visible' }}>
                   <FormStrip form={player.form} />
                 </div>
               </div>
