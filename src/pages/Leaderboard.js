@@ -192,8 +192,9 @@ export default function Leaderboard() {
             }
           }
           const noScorerMatch = !result.firstGoalscorer && pred.firstGoalscorer === 'No goalscorer';
-          const scorerMatch = result.firstGoalscorer && pred.firstGoalscorer === result.firstGoalscorer;
-          if (noScorerMatch || scorerMatch) {
+          const ownGoalMatch = result.firstGoalscorer === 'Own goal' && pred.firstGoalscorer === 'Own goal';
+          const scorerMatch = result.firstGoalscorer && result.firstGoalscorer !== 'Own goal' && pred.firstGoalscorer === result.firstGoalscorer;
+          if (noScorerMatch || ownGoalMatch || scorerMatch) {
             pts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerHits++;
@@ -272,7 +273,7 @@ export default function Leaderboard() {
             const diff = prevRankMap[player.id] - currRankActive[player.id];
             if (diff > 0) return { label: `▲${diff}`, color: 'var(--green)' };
             if (diff < 0) return { label: `▼${Math.abs(diff)}`, color: 'var(--red)' };
-            return { label: '◆', color: 'var(--text-3)' }; // no change — diamond neutral
+            return { label: '◇', color: 'var(--text-3)' }; // no change — diamond neutral
           })();
 
           return (
@@ -287,14 +288,12 @@ export default function Leaderboard() {
                   transition: 'background 0.1s',
                 }}
               >
-                {/* Rank + movement indicator — arrow left, number right */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  {movArrow && (
-                    <span style={{ fontSize: movArrow.label === '◆' ? 7 : 8, fontWeight: 800, color: movArrow.color, lineHeight: 1, minWidth: 14, textAlign: 'right' }}>
-                      {movArrow.label}
-                    </span>
-                  )}
-                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
+                {/* Rank + movement — fixed width so numbers always align */}
+                <div style={{ display: 'flex', alignItems: 'center', width: 38 }}>
+                  <span style={{ display: 'inline-block', width: 18, textAlign: 'right', fontSize: 8, fontWeight: 800, color: movArrow ? movArrow.color : 'transparent', lineHeight: 1, flexShrink: 0 }}>
+                    {movArrow ? movArrow.label : '◇'}
+                  </span>
+                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1, marginLeft: 2 }}>
                     {rank}
                   </span>
                 </div>

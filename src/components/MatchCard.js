@@ -58,8 +58,9 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     else if (correctResult) pts += SCORING.CORRECT_RESULT;
     if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
     const noScorerMatch = !fixture.result.firstGoalscorer && prediction.firstGoalscorer === 'No goalscorer';
-    const scorerMatch = fixture.result.firstGoalscorer && prediction.firstGoalscorer === fixture.result.firstGoalscorer;
-    if (noScorerMatch || scorerMatch) pts += SCORING.FIRST_GOALSCORER;
+    const ownGoalMatch = fixture.result.firstGoalscorer === 'Own goal' && prediction.firstGoalscorer === 'Own goal';
+    const scorerMatch = fixture.result.firstGoalscorer && fixture.result.firstGoalscorer !== 'Own goal' && prediction.firstGoalscorer === fixture.result.firstGoalscorer;
+    if (noScorerMatch || ownGoalMatch || scorerMatch) pts += SCORING.FIRST_GOALSCORER;
     const finalPts = boosterApplied ? pts * 2 : pts;
     return { pts: finalPts, rawPts: pts, correctScore, correctResult, correctGD, boosted: boosterApplied && pts > 0 };
   }
@@ -166,6 +167,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
               >
                 <option value="">Pick a player...</option>
                 <option value="No goalscorer">🚫 No goalscorer</option>
+                <option value="Own goal">🙈 Own goal</option>
                 <optgroup label={`⚽ ${fixture.home}`}>
                   {getSquadOrdered(fixture.home).map(p => (
                     <option key={p.name} value={p.name}>[{p.pos}] {p.name}</option>
