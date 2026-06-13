@@ -161,6 +161,7 @@ export default function Leaderboard() {
 
           if (!pred) {
             users[uid].form.push('-');
+            users[uid].history.push({ cumulative, matchId: fixture.id });
             return;
           }
 
@@ -245,20 +246,26 @@ export default function Leaderboard() {
 
     return (
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-        {/* Header row */}
+        {/* Header row — 5 columns: move | # | player | pts | form */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '42px 1fr 52px 90px',
+          display: 'grid', gridTemplateColumns: '28px 32px 1fr 56px 96px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
-          {['#', 'Player', 'Pts', 'Form'].map((h, i) => (
-            <span key={h} style={{
+          {[
+            { label: '', align: 'center' },
+            { label: '#', align: 'center' },
+            { label: 'Player', align: 'left' },
+            { label: 'Pts', align: 'center' },
+            { label: 'Form', align: 'center', borderLeft: true },
+          ].map(({ label, align, borderLeft }) => (
+            <span key={label + align} style={{
               fontSize: 10, color: 'var(--text-3)', fontWeight: 700,
               textTransform: 'uppercase', letterSpacing: '0.05em',
-              textAlign: i === 2 ? 'center' : i === 3 ? 'center' : 'left',
-              borderLeft: i === 3 ? '1px solid var(--border)' : undefined,
-              paddingLeft: i === 3 ? 8 : undefined,
-            }}>{h}</span>
+              textAlign: align,
+              borderLeft: borderLeft ? '1px solid var(--border)' : undefined,
+              paddingLeft: borderLeft ? 10 : undefined,
+            }}>{label}</span>
           ))}
         </div>
 
@@ -273,7 +280,7 @@ export default function Leaderboard() {
             const diff = prevRankMap[player.id] - currRankActive[player.id];
             if (diff > 0) return { label: `▲${diff}`, color: 'var(--green)' };
             if (diff < 0) return { label: `▼${Math.abs(diff)}`, color: 'var(--red)' };
-            return { label: '◇', color: 'var(--text-3)' }; // no change — diamond neutral
+            return { label: '◆', color: 'var(--text-3)' }; // no change — diamond neutral
           })();
 
           return (
@@ -281,19 +288,24 @@ export default function Leaderboard() {
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '42px 1fr 52px 90px',
-                  padding: '10px 14px', borderBottom: '1px solid var(--border)',
+                  display: 'grid', gridTemplateColumns: '28px 32px 1fr 56px 96px',
+                  padding: '11px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
                   transition: 'background 0.1s',
                 }}
               >
-                {/* Rank + movement — fixed width so numbers always align */}
-                <div style={{ display: 'flex', alignItems: 'center', width: 38 }}>
-                  <span style={{ display: 'inline-block', width: 18, textAlign: 'right', fontSize: 8, fontWeight: 800, color: movArrow ? movArrow.color : 'transparent', lineHeight: 1, flexShrink: 0 }}>
-                    {movArrow ? movArrow.label : '◇'}
-                  </span>
-                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1, marginLeft: 2 }}>
+                {/* Movement column — own separate cell */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  {movArrow && (
+                    <span style={{ fontSize: movArrow.label === '◆' ? 8 : 9, fontWeight: 800, color: movArrow.color, lineHeight: 1 }}>
+                      {movArrow.label}
+                    </span>
+                  )}
+                </div>
+                {/* Rank column */}
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
                     {rank}
                   </span>
                 </div>
@@ -302,7 +314,7 @@ export default function Leaderboard() {
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 4 }}>you</span>}
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
-                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 10 }}>
                   <FormStrip form={player.form} />
                 </div>
               </div>
