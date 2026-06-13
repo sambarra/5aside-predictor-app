@@ -270,7 +270,7 @@ export default function Leaderboard() {
             const diff = prevRankMap[player.id] - curr;
             if (diff > 0) return { label: `▲${diff}`, color: 'var(--green)' };
             if (diff < 0) return { label: `▼${Math.abs(diff)}`, color: 'var(--red)' };
-            return { label: '—', color: 'var(--text-3)' };
+            return null; // no change — don't show anything
           })();
 
           return (
@@ -285,16 +285,16 @@ export default function Leaderboard() {
                   transition: 'background 0.1s',
                 }}
               >
-                {/* Rank + movement indicator stacked */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
-                    {rank}
-                  </span>
-                  {movArrow && (
-                    <span style={{ fontSize: 9, fontWeight: 700, color: movArrow.color, lineHeight: 1, marginTop: 2 }}>
+                {/* Rank + movement indicator — arrow left, number right */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  {movArrow && movArrow.label !== '—' && (
+                    <span style={{ fontSize: 8, fontWeight: 800, color: movArrow.color, lineHeight: 1, minWidth: 14, textAlign: 'right' }}>
                       {movArrow.label}
                     </span>
                   )}
+                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
+                    {rank}
+                  </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{player.name}</span>
