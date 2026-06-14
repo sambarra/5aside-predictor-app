@@ -55,7 +55,7 @@ function FormStrip({ form }) {
   const labels = { E: 'S', R: 'R', W: '\u2717', '-': '-' };
   const titles = { E: 'Correct score', R: 'Correct result', W: 'Wrong', '-': 'No prediction' };
   return (
-    <div style={{ display: 'flex', gap: 5 }}>
+    <div style={{ display: 'flex', gap: 10 }}>
       {last5.map((f, i) => {
         const entry = typeof f === 'object' ? f : { r: f, s: false, b: false };
         return (
@@ -73,7 +73,7 @@ function FormStrip({ form }) {
               <span style={{
                 position: 'absolute', top: -4, right: -4,
                 fontSize: 8, lineHeight: 1, pointerEvents: 'none',
-              }} title="Correct first goalscorer">\u26bd</span>
+              }} title="Correct first goalscorer">{'⚽'}</span>
             )}
             {entry.b && (
               <span style={{
@@ -248,7 +248,7 @@ export default function Leaderboard() {
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {/* Header row — 5 columns: move | # | player | pts | form */}
         <div style={{
-          display: 'grid', gridTemplateColumns: '48px 1fr 52px 114px',
+          display: 'grid', gridTemplateColumns: '48px 1fr 52px 150px',
           padding: '8px 14px', borderBottom: '1px solid var(--border)',
           background: 'var(--surface-2)',
         }}>
@@ -287,7 +287,7 @@ export default function Leaderboard() {
               <div
                 onClick={() => setExpanded(isExpanded ? null : player.id)}
                 style={{
-                  display: 'grid', gridTemplateColumns: '48px 1fr 52px 114px',
+                  display: 'grid', gridTemplateColumns: '48px 1fr 52px 150px',
                   padding: '11px 14px', borderBottom: '1px solid var(--border)',
                   background: isMe ? 'rgba(0,255,106,0.04)' : undefined,
                   cursor: 'pointer', alignItems: 'center',
@@ -310,7 +310,7 @@ export default function Leaderboard() {
                   {isMe && <span style={{ fontSize: 10, color: 'var(--green)', marginLeft: 4 }}>you</span>}
                 </div>
                 <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 22, color: 'var(--green)', textAlign: 'center' }}>{player.points}</span>
-                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 8, paddingTop: 4, paddingBottom: 4, overflow: 'visible' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', borderLeft: '1px solid var(--border)', paddingLeft: 10, paddingTop: 6, paddingBottom: 6, overflow: 'visible' }}>
                   <FormStrip form={player.form} />
                 </div>
               </div>
