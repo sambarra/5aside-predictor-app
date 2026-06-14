@@ -53,11 +53,11 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     // Goal difference bonus — only when not exact score
     const actualGD = fixture.result.home - fixture.result.away;
     const predGD = prediction.homeScore - prediction.awayScore;
-    const correctGD = !correctScore && (actualGD === predGD);
+    const correctGD = !correctScore && actualGD !== 0 && (actualGD === predGD);
     if (correctScore) pts += SCORING.EXACT_SCORE;
     else if (correctResult) pts += SCORING.CORRECT_RESULT;
     if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
-    const noScorerMatch = !fixture.result.firstGoalscorer && prediction.firstGoalscorer === 'No goalscorer';
+    const noScorerMatch = fixture.result.firstGoalscorer === 'No goalscorer' && prediction.firstGoalscorer === 'No goalscorer';
     const ownGoalMatch = fixture.result.firstGoalscorer === 'Own goal' && prediction.firstGoalscorer === 'Own goal';
     const scorerMatch = fixture.result.firstGoalscorer && fixture.result.firstGoalscorer !== 'Own goal' && prediction.firstGoalscorer === fixture.result.firstGoalscorer;
     if (noScorerMatch || ownGoalMatch || scorerMatch) pts += SCORING.FIRST_GOALSCORER;

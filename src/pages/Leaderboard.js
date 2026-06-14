@@ -186,13 +186,13 @@ export default function Leaderboard() {
             }
             const actualGD = result.home - result.away;
             const predGD = Number(pred.homeScore) - Number(pred.awayScore);
-            if (!isNaN(predGD) && actualGD === predGD) {
+            if (!isNaN(predGD) && actualGD === predGD && actualGD !== 0) {
               pts += SCORING.GOAL_DIFFERENCE;
               fe.b = true;
               users[uid].gdBonus++;
             }
           }
-          const noScorerMatch = !result.firstGoalscorer && pred.firstGoalscorer === 'No goalscorer';
+          const noScorerMatch = result.firstGoalscorer === 'No goalscorer' && pred.firstGoalscorer === 'No goalscorer';
           const ownGoalMatch = result.firstGoalscorer === 'Own goal' && pred.firstGoalscorer === 'Own goal';
           const scorerMatch = result.firstGoalscorer && result.firstGoalscorer !== 'Own goal' && pred.firstGoalscorer === result.firstGoalscorer;
           if (noScorerMatch || ownGoalMatch || scorerMatch) {
