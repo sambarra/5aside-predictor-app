@@ -148,7 +148,7 @@ export default function Fixtures() {
           <span style={{ color: 'var(--text)', fontWeight: 600 }}>Group Stage: </span>
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsExact}pts</span> score ·{' '}
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsResult}pts</span> result ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> WM ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> GD ·{' '}
           <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> 1st scorer
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>

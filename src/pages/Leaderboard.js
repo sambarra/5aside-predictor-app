@@ -82,7 +82,7 @@ function FormStrip({ form }) {
                 background: '#141414', border: '1.5px solid #282828',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 9, lineHeight: 1, pointerEvents: 'none',
-              }} title="Winning Margin bonus">🤏</span>
+              }} title="Goal Difference bonus">🤏</span>
             )}
           </div>
         );
@@ -186,7 +186,7 @@ export default function Leaderboard() {
             }
             const actualGD = result.home - result.away;
             const predGD = Number(pred.homeScore) - Number(pred.awayScore);
-            if (!isNaN(predGD) && actualGD === predGD && actualGD !== 0) {
+            if (!isNaN(predGD) && actualGD === predGD) {
               pts += SCORING.GOAL_DIFFERENCE;
               fe.b = true;
               users[uid].gdBonus++;
@@ -322,7 +322,7 @@ export default function Leaderboard() {
                     {[
                       { label: 'Correct scores', value: player.correctScores },
                       { label: 'Correct results', value: player.correctResults },
-                      { label: 'WM bonuses', value: player.gdBonus ?? 0 },
+                      { label: 'GD bonuses', value: player.gdBonus ?? 0 },
                       { label: '1st scorers', value: player.scorerHits ?? 0 },
                     ].map(s => (
                       <div key={s.label} style={{ background: 'var(--surface-3)', borderRadius: 8, padding: '8px 6px', textAlign: 'center' }}>
@@ -421,7 +421,7 @@ export default function Leaderboard() {
               <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--surface-3)' }}></div>
               <span style={{ position: 'absolute', top: -6, left: -6, width: 13, height: 13, borderRadius: '50%', background: '#141414', border: '1.5px solid #282828', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, lineHeight: 1 }}>🤏</span>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Winning Margin</span>
+            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Goal Difference bonus</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ position: 'relative', width: 22, height: 22, flexShrink: 0 }}>
