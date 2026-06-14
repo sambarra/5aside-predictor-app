@@ -206,7 +206,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
                 {pointsData?.correctScore && <span className="result-correct"> ✓ Correct score (+{SCORING.EXACT_SCORE})</span>}
                 {!pointsData?.correctScore && pointsData?.correctResult && <span className="result-partial"> ✓ Correct result (+{SCORING.CORRECT_RESULT})</span>}
                 {!pointsData?.correctScore && !pointsData?.correctResult && <span className="result-wrong"> ✗ Wrong</span>}
-                {pointsData?.correctGD && <span className="result-correct"> · GD bonus (+{SCORING.GOAL_DIFFERENCE})</span>}
+                {pointsData?.correctGD && <span className="result-correct"> · Winning margin (+{SCORING.GOAL_DIFFERENCE})</span>}
               </span>
               {prediction.firstGoalscorer && (
                 <span>

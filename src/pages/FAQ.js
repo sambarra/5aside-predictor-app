@@ -20,8 +20,8 @@ const FAQS = [
     a: "Each player gets one Booster per round (group stage, Round of 32, Round of 16, etc.). Apply it to any match before predictions lock — it doubles ALL your points for that match (correct score, GD bonus, correct result, and first goalscorer). A perfect match in the Final with a booster could be worth over 70 points. You can move your booster to a different match right up until 5 minutes before kick-off. Once that match locks, it stays. Use it wisely — it could be your comeback card.",
   },
   {
-    q: 'What is the Goal Difference (GD) bonus?',
-    a: "If your predicted goal difference matches the actual goal difference — but you didn't get the exact score — you earn a GD bonus. Example: result is 3-2 (GD +1) and you predicted 1-0 (also GD +1) — bonus awarded. It does not apply if you already got the correct score. Escalates each round: +1pt in group stage, up to +6pts in the Final.",
+    q: 'What is the Winning Margin (WM) bonus?',
+    a: "You earn this bonus when you predicted the right winning margin but not the exact score. For example: result is 3–2 and you predicted 1–0 — both are 1-goal wins, so you earn the bonus. It doesn't apply to drawn games (a draw always has a margin of zero), and it doesn't apply if you got the exact score right. Escalates each round: +1pt in group stage, up to +6pts in the Final.",
   },
   {
     q: 'What if I miss a match?',
@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     q: 'How are points scored?',
-    a: 'Points escalate each round. Correct score goes up +2 per round (from +6 in the group stage to +16 in the Final). All other categories go up +1 per round. There is also a Goal Difference bonus — see below.',
+    a: 'Points escalate each round. Correct score goes up +2 per round (from +6 in the group stage to +16 in the Final). All other categories go up +1 per round. There is also a Winning Margin bonus — see below.',
   },
   {
     q: 'What happens if a match goes to extra time or penalties?',
@@ -97,7 +97,7 @@ export default function FAQ({ onBack }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
-                {['Round', 'Score', 'GD bonus', 'Result', 'Scorer'].map((h, i) => (
+                {['Round', 'Score', 'WM bonus', 'Result', 'Scorer'].map((h, i) => (
                   <th key={h} style={{ padding: '8px 12px', textAlign: i === 0 ? 'left' : 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>
