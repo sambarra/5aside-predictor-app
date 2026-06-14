@@ -5,9 +5,10 @@ import {
   doc, setDoc, updateDoc, getDocs, collection, deleteDoc, query, where
 } from 'firebase/firestore';
 import { GROUP_STAGE_FIXTURES } from '../data/fixtures';
+import { getSquadOrdered } from '../data/squads';
 import { STAGES, R32_BRACKET, KNOCKOUT_TEMPLATE } from '../data/knockoutFixtures';
 
-const HARDCODED_SUPER_ADMIN = 'WC2026admin';
+const HARDCODED_SUPER_ADMIN = 'WC2026';
 
 // Searchable team picker for tournament results
 function TeamSearch({ value, onChange, placeholder }) {
@@ -49,6 +50,71 @@ function TeamSearch({ value, onChange, placeholder }) {
 }
 
 // Searchable player picker for golden boot
+
+// Searchable scorer picker with diacritic normalization
+function ScorerSearch({ value, onChange, homeTeam, awayTeam }) {
+  const [q, setQ] = useState(value || '');
+  const [open, setOpen] = useState(false);
+
+  const normalize = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  const allPlayers = [
+    { name: 'No goalscorer', label: '\ud83d\udeab No goalscorer' },
+    { name: 'Own goal', label: '\ud83d\ude48 Own goal' },
+    ...(homeTeam ? getSquadOrdered(homeTeam).map(p => ({ name: p.name, label: p.name })) : []),
+    ...(awayTeam ? getSquadOrdered(awayTeam).map(p => ({ name: p.name, label: p.name })) : []),
+  ];
+
+  const filtered = q.length >= 2
+    ? allPlayers.filter(p => normalize(p.name).includes(normalize(q)))
+    : allPlayers.slice(0, 2); // just special options when empty
+
+  function select(name) {
+    onChange(name);
+    setQ(name);
+    setOpen(false);
+  }
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <input
+        className="input"
+        type="text"
+        value={q}
+        placeholder="Type 2+ chars to search players…"
+        onChange={e => { setQ(e.target.value); onChange(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        autoComplete="off"
+      />
+      {open && filtered.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 100,
+          background: 'var(--surface-2)', border: '1px solid var(--border)',
+          borderRadius: 6, maxHeight: 200, overflowY: 'auto', marginTop: 2,
+        }}>
+          {filtered.map(p => (
+            <div
+              key={p.name}
+              onMouseDown={() => select(p.name)}
+              style={{
+                padding: '8px 12px', fontSize: 13, cursor: 'pointer',
+                borderBottom: '1px solid var(--border)',
+                background: 'var(--surface-2)',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-3)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'var(--surface-2)'}
+            >
+              {p.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function PlayerSearchAdmin({ value, onChange }) {
   const [query, setQuery] = useState(value ? value.replace(/ \([^)]+\)$/, '') : '');
   const [open, setOpen] = useState(false);
@@ -771,7 +837,12 @@ export default function Admin({ onBack }) {
                   </div>
                   <div style={{ marginBottom: 10 }}>
                     <label style={{ fontSize: 11, color: 'var(--text-2)', display: 'block', marginBottom: 4 }}>First goalscorer</label>
-                    <input className="input" type="text" value={form.firstGoalscorer} onChange={e => setForm(p => ({ ...p, firstGoalscorer: e.target.value }))} placeholder="e.g. Kylian Mbappé" />
+                    <ScorerSearch
+                      value={form.firstGoalscorer}
+                      onChange={val => setForm(p => ({ ...p, firstGoalscorer: val }))}
+                      homeTeam={f?.home}
+                      awayTeam={f?.away}
+                    />
                   </div>
                   <button className="btn btn-primary btn-full" onClick={saveResult} disabled={saving || form.home === '' || form.away === ''}>
                     {saving ? 'Saving...' : 'Save Result'}
