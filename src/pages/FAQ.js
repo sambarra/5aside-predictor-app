@@ -97,7 +97,7 @@ export default function FAQ({ onBack }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
-                {['Round', 'Score', 'WM bonus', 'Result', 'Scorer'].map((h, i) => (
+                {['Round', 'Score', 'Result', 'WM bonus', 'Scorer'].map((h, i) => (
                   <th key={h} style={{ padding: '8px 12px', textAlign: i === 0 ? 'left' : 'center', color: 'var(--text-3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                 ))}
               </tr>

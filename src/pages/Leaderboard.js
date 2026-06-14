@@ -428,7 +428,7 @@ export default function Leaderboard() {
               <div style={{ width: 22, height: 22, borderRadius: 4, background: 'var(--surface-3)' }}></div>
               <span style={{ position: 'absolute', top: -4, right: -4, fontSize: 9, lineHeight: 1 }}>⚽</span>
             </div>
-            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Correct 1st Goalscorer</span>
+            <span style={{ fontSize: 12, color: 'var(--text-2)' }}>1st Goalscorer</span>
           </div>
         </div>
 
