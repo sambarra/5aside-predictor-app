@@ -102,13 +102,14 @@ export default function Leaderboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [usersSnap, resultsSnap, predsSnap, leaguesSnap, tournamentResultsSnap, tournamentPredsSnap] = await Promise.all([
+      const [usersSnap, resultsSnap, predsSnap, leaguesSnap, tournamentResultsSnap, tournamentPredsSnap, boostersSnap] = await Promise.all([
         getDocs(collection(db, 'users')),
         getDocs(collection(db, 'results')),
         getDocs(collection(db, 'predictions')),
         getDocs(query(collection(db, 'leagues'), where('memberIds', 'array-contains', user.id))),
         getDocs(collection(db, 'tournamentResults')), // set by admin when tournament ends
         getDocs(collection(db, 'tournamentPredictions')),
+        getDocs(collection(db, 'boosters')),
       ]);
 
       const users = {};
@@ -116,6 +117,13 @@ export default function Leaderboard() {
 
       const results = {};
       resultsSnap.forEach(d => { results[d.id] = d.data(); });
+
+      // boosterMap[userId] = fixtureId where booster was applied (group stage)
+      const boosterMap = {};
+      boostersSnap.forEach(d => {
+        const data = d.data();
+        if (data.stage === 'group') boosterMap[data.userId] = data.fixtureId;
+      });
 
       const predsByUser = {};
       predsSnap.forEach(d => {
@@ -201,6 +209,9 @@ export default function Leaderboard() {
             users[uid].scorerHits++;
             fe.s = true;
           }
+          // Apply booster: double points if this fixture has booster applied
+          if (boosterMap[uid] === fixture.id && pts > 0) pts = pts * 2;
+
           users[uid].form.push(fe);
 
           users[uid].points += pts;

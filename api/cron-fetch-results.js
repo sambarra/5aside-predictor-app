@@ -161,14 +161,16 @@ export default async function handler(req, res) {
         finalAway = match.score.extraTime.away;
       }
 
-      await db.collection('results').doc(fixture.id).set({
+      // Only include firstGoalscorer if API returned one — preserve manually entered values
+      const resultData = {
         home: finalHome,
         away: finalAway,
-        firstGoalscorer,
         duration: duration || 'REGULAR',
         autoFetched: true,
         fetchedAt: new Date().toISOString(),
-      }, { merge: true });
+      };
+      if (firstGoalscorer) resultData.firstGoalscorer = firstGoalscorer;
+      await db.collection('results').doc(fixture.id).set(resultData, { merge: true });
 
       saved++;
     }
