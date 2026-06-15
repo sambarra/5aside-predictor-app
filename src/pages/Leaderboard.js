@@ -307,7 +307,7 @@ export default function Leaderboard() {
               >
                 {/* Rank + movement — single unit, left-aligned */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: rank <= 3 ? 'var(--green)' : 'var(--text-3)', lineHeight: 1 }}>
+                  <span style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 18, color: 'var(--text)', lineHeight: 1 }}>
                     {rank}
                   </span>
                   {movArrow && (
