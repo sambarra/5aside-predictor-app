@@ -44,6 +44,10 @@ export default function Fixtures() {
       const resultsMap = {};
       resultsSnap.forEach(d => { resultsMap[d.id] = d.data(); });
       setResults(resultsMap);
+
+      // Load applied booster so UI reflects saved state on page load
+      const existingBooster = await getBoosterForStage(user.id, 'group');
+      if (existingBooster) setGroupBooster(existingBooster.fixtureId);
     } finally {
       setLoading(false);
     }
