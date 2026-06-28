@@ -28,17 +28,24 @@ export default function Fixtures() {
   const [filter, setFilter] = useState('Upcoming');
   const [loading, setLoading] = useState(true);
   const [knockoutFixturesList, setKnockoutFixturesList] = useState([]);
+  const [allPredsByFixture, setAllPredsByFixture] = useState({});
   const [boosters, setBoosters] = useState({}); // { [stage]: fixtureId }
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Load user's predictions
-      const predsQuery = query(collection(db, 'predictions'), where('userId', '==', user.id));
-      const predsSnap = await getDocs(predsQuery);
+      // Load ALL predictions — current user's for form state, all for reveal panel
+      const allPredsSnap = await getDocs(collection(db, 'predictions'));
       const predsMap = {};
-      predsSnap.forEach(d => { predsMap[d.data().fixtureId] = d.data(); });
+      const allByFixture = {};
+      allPredsSnap.forEach(d => {
+        const data = d.data();
+        if (data.userId === user.id) predsMap[data.fixtureId] = data;
+        if (!allByFixture[data.fixtureId]) allByFixture[data.fixtureId] = [];
+        allByFixture[data.fixtureId].push(data);
+      });
       setPredictions(predsMap);
+      setAllPredsByFixture(allByFixture);
 
       // Load results
       const resultsSnap = await getDocs(collection(db, 'results'));
@@ -215,6 +222,7 @@ export default function Fixtures() {
                 boosterAvailable={!boosters[fixture.stage || 'group'] || boosters[fixture.stage || 'group'] === fixture.id}
                 onApplyBooster={(fid) => handleApplyBooster(fid, fixture.stage || 'group')}
                 onRemoveBooster={() => handleRemoveBooster(fixture.stage || 'group')}
+                allPredictions={allPredsByFixture[fixture.id] || []}
               />
             ))}
           </div>

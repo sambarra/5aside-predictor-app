@@ -13,6 +13,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     prediction?.homeScore !== undefined && prediction?.homeScore !== ''
   );
 
+  const [showAllPicks, setShowAllPicks] = useState(false);
   const kickoff = new Date(fixture.kickoff);
   const now = new Date();
   const lockTime = new Date(kickoff.getTime() - 5 * 60 * 1000);
@@ -274,7 +275,36 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
             ⚡ Booster applied — all points doubled
           </div>
         )}
+
       </div>
+
+      {/* All picks reveal — shown after kickoff */}
+      {locked && allPredictions.length > 0 && (
+        <div style={{ borderTop: '1px solid var(--border)', padding: '8px 14px' }}>
+          <button
+            onClick={() => setShowAllPicks(p => !p)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 12, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <span style={{ fontSize: 10 }}>{showAllPicks ? '▲' : '▼'}</span>
+            All picks ({allPredictions.length})
+          </button>
+          {showAllPicks && (
+            <div style={{ marginTop: 8 }}>
+              {[...allPredictions]
+                .sort((a, b) => (a.userName || '').localeCompare(b.userName || ''))
+                .map((p, i) => (
+                  <div key={p.userId || i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid var(--border)', fontSize: 13 }}>
+                    <span style={{ fontWeight: 600 }}>{p.userName || '?'}</span>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ color: 'var(--text-2)', fontWeight: 700 }}>{p.homeScore ?? '?'}{'–'}{p.awayScore ?? '?'}</span>
+                      {p.firstGoalscorer ? <span style={{ color: 'var(--text-3)', fontSize: 11 }}>{'⚽'} {p.firstGoalscorer}</span> : null}
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

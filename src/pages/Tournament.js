@@ -1,7 +1,7 @@
 // build-20260609
 import React, { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, getDocs, collection } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { TOURNAMENT_PREDICTIONS_CONFIG, ALL_TEAMS } from '../data/fixtures';
 import { SQUADS, getSquadOrdered } from '../data/squads';
@@ -124,6 +124,9 @@ export default function TournamentPredictions() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [view, setView] = useState('my'); // 'my' | 'all'
+  const [allPicks, setAllPicks] = useState([]);
+  const [loadingAll, setLoadingAll] = useState(false);
 
   useEffect(() => {
     setLocked(new Date() >= DEADLINE);
@@ -141,6 +144,19 @@ export default function TournamentPredictions() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAllPicks() {
+    if (allPicks.length || loadingAll) return;
+    setLoadingAll(true);
+    try {
+      const snap = await getDocs(collection(db, 'tournamentPredictions'));
+      const picks = [];
+      snap.forEach(d => picks.push({ userId: d.id, ...d.data() }));
+      setAllPicks(picks);
+    } finally {
+      setLoadingAll(false);
     }
   }
 
@@ -170,6 +186,65 @@ export default function TournamentPredictions() {
     <div className="page">
       <h1 className="page-title">🏆 Tournament Picks</h1>
       <p className="page-sub">Lock in your predictions before the tournament starts</p>
+
+      {/* View toggle */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <button
+          className={view === 'my' ? 'btn btn-primary btn-sm' : 'btn btn-sm'}
+          onClick={() => setView('my')}
+        >My Picks</button>
+        <button
+          className={view === 'all' ? 'btn btn-primary btn-sm' : 'btn btn-sm'}
+          onClick={() => { setView('all'); loadAllPicks(); }}
+        >Everyone's Picks</button>
+      </div>
+
+      {/* Everyone's Picks view */}
+      {view === 'all' && (
+        <div>
+          {loadingAll ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading picks…</div>
+          ) : allPicks.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No picks submitted yet</div>
+          ) : (
+            TOURNAMENT_PREDICTIONS_CONFIG.map(cat => {
+              // Group picks by team/player
+              const grouped = {};
+              const noPick = [];
+              allPicks.forEach(p => {
+                const val = p[cat.id];
+                if (val) { if (!grouped[val]) grouped[val] = []; grouped[val].push(p.userName || p.userId); }
+                else noPick.push(p.userName || p.userId);
+              });
+              const sorted = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+              return (
+                <div key={cat.id} className="card" style={{ marginBottom: 12 }}>
+                  <p style={{ fontWeight: 700, fontSize: 13, marginBottom: 10 }}>
+                    {cat.icon} {cat.label} <span style={{ color: 'var(--green)', fontWeight: 600 }}>+{cat.points}pts</span>
+                  </p>
+                  {sorted.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-3)' }}>No picks yet</p>}
+                  {sorted.map(([team, users]) => (
+                    <div key={team} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{team}</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-2)', textAlign: 'right', maxWidth: '55%' }}>
+                        {users.join(', ')}
+                        <span style={{ color: 'var(--text-3)', marginLeft: 6 }}>({users.length})</span>
+                      </span>
+                    </div>
+                  ))}
+                  {noPick.length > 0 && (
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
+                      No pick: {noPick.join(', ')}
+                    </p>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      )}
+
+      {view === 'my' && (<>
 
       {/* Deadline warning */}
       {!locked && (
@@ -249,6 +324,7 @@ export default function TournamentPredictions() {
           )}
         </div>
       )}
+      </>)}
     </div>
   );
 }
