@@ -34,15 +34,21 @@ export default function Fixtures() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      // Load ALL predictions — current user's for form state, all for reveal panel
-      const allPredsSnap = await getDocs(collection(db, 'predictions'));
+      // Load ALL predictions + current user names (for reveal panel with fresh names)
+      const [allPredsSnap, usersSnap] = await Promise.all([
+        getDocs(collection(db, 'predictions')),
+        getDocs(collection(db, 'users')),
+      ]);
+      const currentNames = {};
+      usersSnap.forEach(d => { currentNames[d.id] = d.data().name; });
       const predsMap = {};
       const allByFixture = {};
       allPredsSnap.forEach(d => {
         const data = d.data();
+        const enriched = { ...data, userName: currentNames[data.userId] || data.userName };
         if (data.userId === user.id) predsMap[data.fixtureId] = data;
         if (!allByFixture[data.fixtureId]) allByFixture[data.fixtureId] = [];
-        allByFixture[data.fixtureId].push(data);
+        allByFixture[data.fixtureId].push(enriched);
       });
       setPredictions(predsMap);
       setAllPredsByFixture(allByFixture);
@@ -150,7 +156,7 @@ export default function Fixtures() {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
             <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Match predictions made</span>
             <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>
-              {totalPredicted} / {allFixtures.length} matches
+              {totalPredicted} / 104 matches
             </span>
           </div>
           <div className="progress-bar">

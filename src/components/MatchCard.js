@@ -286,7 +286,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', fontSize: 12, fontWeight: 600, padding: 0, display: 'flex', alignItems: 'center', gap: 6 }}
           >
             <span style={{ fontSize: 10 }}>{showAllPicks ? '▲' : '▼'}</span>
-            All picks ({allPredictions.length})
+            Everyone's predictions ({allPredictions.length})
           </button>
           {showAllPicks && (
             <div style={{ marginTop: 8 }}>
