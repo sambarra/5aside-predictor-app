@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES, SCORING } from '../data/fixtures';
+import { STAGES } from '../data/knockoutFixtures';
 
 // Mini sparkline component for points progression
 function PositionGraph({ playerId, allPlayers }) {
@@ -102,7 +103,7 @@ export default function Leaderboard() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [usersSnap, resultsSnap, predsSnap, leaguesSnap, tournamentResultsSnap, tournamentPredsSnap, boostersSnap] = await Promise.all([
+      const [usersSnap, resultsSnap, predsSnap, leaguesSnap, tournamentResultsSnap, tournamentPredsSnap, boostersSnap, knockoutFixturesSnap] = await Promise.all([
         getDocs(collection(db, 'users')),
         getDocs(collection(db, 'results')),
         getDocs(collection(db, 'predictions')),
@@ -110,6 +111,7 @@ export default function Leaderboard() {
         getDocs(collection(db, 'tournamentResults')), // set by admin when tournament ends
         getDocs(collection(db, 'tournamentPredictions')),
         getDocs(collection(db, 'boosters')),
+        getDocs(collection(db, 'knockoutFixtures')),
       ]);
 
       const users = {};
@@ -118,11 +120,12 @@ export default function Leaderboard() {
       const results = {};
       resultsSnap.forEach(d => { results[d.id] = d.data(); });
 
-      // boosterMap[userId] = fixtureId where booster was applied (group stage)
+      // boosterMap[userId][stage] = fixtureId where booster was applied
       const boosterMap = {};
       boostersSnap.forEach(d => {
         const data = d.data();
-        if (data.stage === 'group') boosterMap[data.userId] = data.fixtureId;
+        if (!boosterMap[data.userId]) boosterMap[data.userId] = {};
+        boosterMap[data.userId][data.stage] = data.fixtureId;
       });
 
       const predsByUser = {};
@@ -145,7 +148,14 @@ export default function Leaderboard() {
       tournamentPredsSnap.forEach(d => { tournamentPreds[d.id] = d.data(); });
 
       // Calculate scores per match in kickoff order for form/history
-      const sortedFixtures = [...GROUP_STAGE_FIXTURES].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
+      // Merge group + knockout fixtures, sorted by kickoff
+      const knockoutFixturesList = [];
+      knockoutFixturesSnap.forEach(d => {
+        const data = d.data();
+        if (data.active && data.kickoff) knockoutFixturesList.push({ ...data, id: d.id });
+      });
+      const sortedFixtures = [...GROUP_STAGE_FIXTURES, ...knockoutFixturesList]
+        .sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
 
       Object.keys(users).forEach(uid => {
         // Add tournament bonus points if tournament is complete
@@ -181,12 +191,12 @@ export default function Leaderboard() {
           let pts = 0;
           const fe = { r: '-', s: false, b: false };
           if (correctScore) {
-            pts += SCORING.EXACT_SCORE;
+            pts += S.EXACT_SCORE;
             users[uid].correctScores++;
             fe.r = 'E';
           } else {
             if (correctResult) {
-              pts += SCORING.CORRECT_RESULT;
+              pts += S.CORRECT_RESULT;
               users[uid].correctResults++;
               fe.r = 'R';
             } else {
@@ -195,7 +205,7 @@ export default function Leaderboard() {
             const actualGD = result.home - result.away;
             const predGD = Number(pred.homeScore) - Number(pred.awayScore);
             if (!isNaN(predGD) && actualGD === predGD) {
-              pts += SCORING.GOAL_DIFFERENCE;
+              pts += S.GOAL_DIFFERENCE;
               fe.b = true;
               users[uid].gdBonus++;
             }
@@ -204,13 +214,20 @@ export default function Leaderboard() {
           const ownGoalMatch = result.firstGoalscorer === 'Own goal' && pred.firstGoalscorer === 'Own goal';
           const scorerMatch = result.firstGoalscorer && result.firstGoalscorer !== 'Own goal' && pred.firstGoalscorer === result.firstGoalscorer;
           if (noScorerMatch || ownGoalMatch || scorerMatch) {
-            pts += SCORING.FIRST_GOALSCORER;
+            pts += S.FIRST_GOALSCORER;
             users[uid].scorerPts += SCORING.FIRST_GOALSCORER;
             users[uid].scorerHits++;
             fe.s = true;
           }
-          // Apply booster: double points if this fixture has booster applied
-          if (boosterMap[uid] === fixture.id && pts > 0) pts = pts * 2;
+          // Stage-aware scoring values
+          const fixtureStage = fixture.stage || 'group';
+          const S = fixtureStage === 'group' ? SCORING : (() => {
+            const si = STAGES[fixtureStage];
+            return si ? { EXACT_SCORE: si.pointsExact, CORRECT_RESULT: si.pointsResult, GOAL_DIFFERENCE: si.pointsGD, FIRST_GOALSCORER: si.pointsScorer } : SCORING;
+          })();
+
+          // Apply booster: double points if this fixture has booster applied for this stage
+          if (boosterMap[uid]?.[fixtureStage] === fixture.id && pts > 0) pts = pts * 2;
 
           users[uid].form.push(fe);
 
