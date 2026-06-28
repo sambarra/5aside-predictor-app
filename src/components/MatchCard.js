@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { getSquadOrdered } from '../data/squads';
 import { SCORING } from '../data/fixtures';
+import { STAGES } from '../data/knockoutFixtures';
 
 export default function MatchCard({ fixture, prediction, onSave, isLocked, boosterApplied, onApplyBooster, onRemoveBooster, boosterAvailable }) {
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? '');
@@ -39,6 +40,13 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     }
   }
 
+  // Stage-aware scoring
+  const fixtureStage = fixture.stage || 'group';
+  const S = fixtureStage === 'group' ? SCORING : (() => {
+    const si = STAGES[fixtureStage];
+    return si ? { EXACT_SCORE: si.pointsExact, CORRECT_RESULT: si.pointsResult, GOAL_DIFFERENCE: si.pointsGD, FIRST_GOALSCORER: si.pointsScorer } : SCORING;
+  })();
+
   function getPoints() {
     if (!hasResult || !prediction || !hasPrediction) return null;
     let pts = 0;
@@ -54,13 +62,13 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
     const actualGD = fixture.result.home - fixture.result.away;
     const predGD = prediction.homeScore - prediction.awayScore;
     const correctGD = !correctScore && (actualGD === predGD);
-    if (correctScore) pts += SCORING.EXACT_SCORE;
-    else if (correctResult) pts += SCORING.CORRECT_RESULT;
-    if (correctGD) pts += SCORING.GOAL_DIFFERENCE;
+    if (correctScore) pts += S.EXACT_SCORE;
+    else if (correctResult) pts += S.CORRECT_RESULT;
+    if (correctGD) pts += S.GOAL_DIFFERENCE;
     const noScorerMatch = fixture.result.firstGoalscorer === 'No goalscorer' && prediction.firstGoalscorer === 'No goalscorer';
     const ownGoalMatch = fixture.result.firstGoalscorer === 'Own goal' && prediction.firstGoalscorer === 'Own goal';
     const scorerMatch = fixture.result.firstGoalscorer && fixture.result.firstGoalscorer !== 'Own goal' && prediction.firstGoalscorer === fixture.result.firstGoalscorer;
-    if (noScorerMatch || ownGoalMatch || scorerMatch) pts += SCORING.FIRST_GOALSCORER;
+    if (noScorerMatch || ownGoalMatch || scorerMatch) pts += S.FIRST_GOALSCORER;
     const finalPts = boosterApplied ? pts * 2 : pts;
     return { pts: finalPts, rawPts: pts, correctScore, correctResult, correctGD, boosted: boosterApplied && pts > 0 };
   }

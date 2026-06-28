@@ -27,7 +27,8 @@ export default function Fixtures() {
   const [results, setResults] = useState({});
   const [filter, setFilter] = useState('Upcoming');
   const [loading, setLoading] = useState(true);
-    const [groupBooster, setGroupBooster] = useState(null);
+  const [knockoutFixturesList, setKnockoutFixturesList] = useState([]);
+  const [boosters, setBoosters] = useState({}); // { [stage]: fixtureId }
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -45,9 +46,18 @@ export default function Fixtures() {
       resultsSnap.forEach(d => { resultsMap[d.id] = d.data(); });
       setResults(resultsMap);
 
-      // Load applied booster so UI reflects saved state on page load
-      const existingBooster = await getBoosterForStage(user.id, 'group');
-      if (existingBooster) setGroupBooster(existingBooster.fixtureId);
+      // Load active knockout fixtures
+      const koSnap = await getDocs(collection(db, 'knockoutFixtures'));
+      const koList = [];
+      koSnap.forEach(d => { const data = d.data(); if (data.active) koList.push({ ...data, id: d.id }); });
+      setKnockoutFixturesList(koList);
+
+      // Load all boosters for this user across all stages
+      const boostersQuery = query(collection(db, 'boosters'), where('userId', '==', user.id));
+      const boostersSnap = await getDocs(boostersQuery);
+      const boostersMap = {};
+      boostersSnap.forEach(d => { const data = d.data(); boostersMap[data.stage] = data.fixtureId; });
+      setBoosters(boostersMap);
     } finally {
       setLoading(false);
     }
@@ -55,14 +65,14 @@ export default function Fixtures() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  async function handleApplyBooster(fixtureId) {
-    await applyBooster(user.id, 'group', fixtureId);
-    setGroupBooster(fixtureId);
+  async function handleApplyBooster(fixtureId, stage) {
+    await applyBooster(user.id, stage, fixtureId);
+    setBoosters(prev => ({ ...prev, [stage]: fixtureId }));
   }
 
-  async function handleRemoveBooster() {
-    await removeBooster(user.id, 'group');
-    setGroupBooster(null);
+  async function handleRemoveBooster(stage) {
+    await removeBooster(user.id, stage);
+    setBoosters(prev => { const n = { ...prev }; delete n[stage]; return n; });
   }
 
   async function savePrediction(fixtureId, data) {
@@ -80,7 +90,12 @@ export default function Fixtures() {
   const now = new Date();
   const today = now.toDateString();
 
-  const fixturesWithResults = GROUP_STAGE_FIXTURES.map(f => ({
+  const allFixtures = [
+    ...GROUP_STAGE_FIXTURES.map(f => ({ ...f, stage: 'group' })),
+    ...knockoutFixturesList,
+  ].sort((a, b) => new Date(a.kickoff) - new Date(b.kickoff));
+
+  const fixturesWithResults = allFixtures.map(f => ({
     ...f,
     result: results[f.id] || null,
   }));
@@ -96,8 +111,8 @@ export default function Fixtures() {
   const grouped = groupByDate(filtered);
 
   const totalPredicted = Object.keys(predictions).length;
-  const upcoming = GROUP_STAGE_FIXTURES.filter(f => new Date(f.kickoff) > now).length;
-  const progress = upcoming > 0 ? Math.min(100, (totalPredicted / GROUP_STAGE_FIXTURES.length) * 100) : 100;
+  const upcoming = allFixtures.filter(f => new Date(f.kickoff) > now).length;
+  const progress = allFixtures.length > 0 ? Math.min(100, (totalPredicted / allFixtures.length) * 100) : 100;
 
   if (loading) {
     return (
@@ -187,10 +202,10 @@ export default function Fixtures() {
                 prediction={predictions[fixture.id]}
                 onSave={savePrediction}
                 isLocked={new Date(new Date(fixture.kickoff).getTime() - 5 * 60 * 1000) <= now}
-                boosterApplied={groupBooster === fixture.id}
-                boosterAvailable={!groupBooster || groupBooster === fixture.id}
-                onApplyBooster={handleApplyBooster}
-                onRemoveBooster={handleRemoveBooster}
+                boosterApplied={boosters[fixture.stage || 'group'] === fixture.id}
+                boosterAvailable={!boosters[fixture.stage || 'group'] || boosters[fixture.stage || 'group'] === fixture.id}
+                onApplyBooster={(fid) => handleApplyBooster(fid, fixture.stage || 'group')}
+                onRemoveBooster={() => handleRemoveBooster(fixture.stage || 'group')}
               />
             ))}
           </div>
