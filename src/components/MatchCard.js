@@ -4,7 +4,7 @@ import { getSquadOrdered } from '../data/squads';
 import { SCORING } from '../data/fixtures';
 import { STAGES } from '../data/knockoutFixtures';
 
-export default function MatchCard({ fixture, prediction, onSave, isLocked, boosterApplied, onApplyBooster, onRemoveBooster, boosterAvailable }) {
+export default function MatchCard({ fixture, prediction, onSave, isLocked, boosterApplied, onApplyBooster, onRemoveBooster, boosterAvailable, allPredictions = [] }) {
   const [homeScore, setHomeScore] = useState(prediction?.homeScore ?? '');
   const [awayScore, setAwayScore] = useState(prediction?.awayScore ?? '');
   const [scorer, setScorer] = useState(prediction?.firstGoalscorer ?? '');
