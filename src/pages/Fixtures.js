@@ -111,6 +111,15 @@ export default function Fixtures() {
   const grouped = groupByDate(filtered);
 
   const totalPredicted = Object.keys(predictions).length;
+  // Determine current stage for UI labels (most imminent or most recent)
+  const upcomingFixtures = allFixtures.filter(f => new Date(f.kickoff) > now);
+  const currentStageId = upcomingFixtures.length > 0
+    ? (upcomingFixtures[0].stage || 'group')
+    : (allFixtures.length > 0 ? (allFixtures[allFixtures.length - 1].stage || 'group') : 'group');
+  const currentStageInfo = currentStageId === 'group'
+    ? { label: 'Group Stage', pointsExact: GROUP_STAGE_SCORING.pointsExact, pointsResult: GROUP_STAGE_SCORING.pointsResult, pointsGD: GROUP_STAGE_SCORING.pointsGD, pointsScorer: GROUP_STAGE_SCORING.pointsScorer }
+    : { label: STAGES[currentStageId]?.label || 'Knockout', ...STAGES[currentStageId] };
+
   const upcoming = allFixtures.filter(f => new Date(f.kickoff) > now).length;
   const progress = allFixtures.length > 0 ? Math.min(100, (totalPredicted / allFixtures.length) * 100) : 100;
 
@@ -127,7 +136,7 @@ export default function Fixtures() {
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <h1 className="page-title">⚽ Matches</h1>
-        <p className="page-sub">World Cup 2026 · Group Stage</p>
+        <p className="page-sub">World Cup 2026 · {currentStageInfo.label}</p>
 
         {/* Progress */}
         <div style={{ marginBottom: 16 }}>
@@ -164,11 +173,11 @@ export default function Fixtures() {
         borderRadius: 'var(--radius-sm)',
       }}>
         <div style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.8 }}>
-          <span style={{ color: 'var(--text)', fontWeight: 600 }}>Group Stage: </span>
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsExact}pts</span> score ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsResult}pts</span> result ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsGD}pt</span> GD ·{' '}
-          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{GROUP_STAGE_SCORING.pointsScorer}pts</span> 1st scorer
+          <span style={{ color: 'var(--text)', fontWeight: 600 }}>{currentStageInfo.label}: </span>
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{currentStageInfo.pointsExact}pts</span> score ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{currentStageInfo.pointsResult}pts</span> result ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{currentStageInfo.pointsGD}pt</span> GD ·{' '}
+          <span style={{ color: 'var(--green)', fontWeight: 700 }}>+{currentStageInfo.pointsScorer}pts</span> 1st scorer
         </div>
         <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 3 }}>
           ⚡ 1 booster available each round (doubles points on 1 match)
