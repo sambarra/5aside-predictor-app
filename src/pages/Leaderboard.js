@@ -188,6 +188,13 @@ export default function Leaderboard() {
           const predHomeWin = pred.homeScore > pred.awayScore, predAwayWin = pred.awayScore > pred.homeScore, predDraw = pred.homeScore === pred.awayScore;
           const correctResult = (homeWin && predHomeWin) || (awayWin && predAwayWin) || (draw && predDraw);
 
+          // Stage-aware scoring
+          const fixtureStage = fixture.stage || 'group';
+          const S = fixtureStage === 'group' ? SCORING : (() => {
+            const si = STAGES[fixtureStage];
+            return si ? { EXACT_SCORE: si.pointsExact, CORRECT_RESULT: si.pointsResult, GOAL_DIFFERENCE: si.pointsGD, FIRST_GOALSCORER: si.pointsScorer } : SCORING;
+          })();
+
           let pts = 0;
           const fe = { r: '-', s: false, b: false };
           if (correctScore) {
@@ -219,13 +226,6 @@ export default function Leaderboard() {
             users[uid].scorerHits++;
             fe.s = true;
           }
-          // Stage-aware scoring values
-          const fixtureStage = fixture.stage || 'group';
-          const S = fixtureStage === 'group' ? SCORING : (() => {
-            const si = STAGES[fixtureStage];
-            return si ? { EXACT_SCORE: si.pointsExact, CORRECT_RESULT: si.pointsResult, GOAL_DIFFERENCE: si.pointsGD, FIRST_GOALSCORER: si.pointsScorer } : SCORING;
-          })();
-
           // Apply booster: double points if this fixture has booster applied for this stage
           if (boosterMap[uid]?.[fixtureStage] === fixture.id && pts > 0) pts = pts * 2;
 

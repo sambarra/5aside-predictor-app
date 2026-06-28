@@ -106,7 +106,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
       {/* Header */}
       <div className="match-header">
         <div className="match-meta">
-          <strong>Group {fixture.group}</strong> · {dateStr} · {timeStr}
+          <strong>{fixture.group ? `Group ${fixture.group}` : (STAGES[fixture.stage]?.shortLabel || 'R32')}</strong> · {dateStr} · {timeStr}
         </div>
         <StatusBadge />
       </div>

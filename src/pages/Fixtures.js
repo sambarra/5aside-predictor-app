@@ -143,7 +143,7 @@ export default function Fixtures() {
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
             <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Match predictions made</span>
             <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>
-              {totalPredicted} / {GROUP_STAGE_FIXTURES.length} matches
+              {totalPredicted} / {allFixtures.length} matches
             </span>
           </div>
           <div className="progress-bar">
