@@ -167,6 +167,7 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
   font-size: 32px;
   letter-spacing: 0.04em;
   margin-bottom: 4px;
+  overflow-x: hidden;
 }
 .page-sub { color: var(--text-2); font-size: 14px; margin-bottom: 24px; }
 
@@ -232,6 +233,7 @@ select.input { cursor: pointer; appearance: none; background-image: url("data:im
   overflow: hidden;
   margin-bottom: 14px;
   transition: border-color 0.15s ease;
+  overflow-x: hidden;
 }
 .match-card.completed { border-color: rgba(0,255,106,0.25); background: rgba(0,255,106,0.02); }
 .match-card.locked { opacity: 0.7; }

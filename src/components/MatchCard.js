@@ -209,9 +209,9 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
         {/* Result breakdown — match finished, you predicted */}
         {hasResult && hasPrediction && (
           <div style={{ marginTop: 10, padding: '10px 12px', background: 'var(--surface-2)', borderRadius: 8, fontSize: 12 }}>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
               <span>
-                Your pick: <strong>{prediction.homeScore}–{prediction.awayScore}</strong>
+                Your prediction: <strong>{prediction.homeScore}–{prediction.awayScore}</strong>
                 {pointsData?.correctScore && <span className="result-correct"> ✓ Correct score (+{SCORING.EXACT_SCORE})</span>}
                 {!pointsData?.correctScore && pointsData?.correctResult && <span className="result-partial"> ✓ Correct result (+{SCORING.CORRECT_RESULT})</span>}
                 {!pointsData?.correctScore && !pointsData?.correctResult && <span className="result-wrong"> ✗ Wrong</span>}
@@ -219,7 +219,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
               </span>
               {prediction.firstGoalscorer && (
                 <span>
-                  Scorer: <strong>{prediction.firstGoalscorer}</strong>
+                  1st Goalscorer: <strong>{prediction.firstGoalscorer}</strong>
                   {fixture.result.firstGoalscorer === prediction.firstGoalscorer
                     ? <span className="result-correct"> ✓ (+{SCORING.FIRST_GOALSCORER})</span>
                     : <span className="result-wrong"> ✗</span>}

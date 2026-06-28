@@ -151,9 +151,18 @@ export default function TournamentPredictions() {
     if (allPicks.length || loadingAll) return;
     setLoadingAll(true);
     try {
-      const snap = await getDocs(collection(db, 'tournamentPredictions'));
+      const [picksSnap, usersSnap] = await Promise.all([
+        getDocs(collection(db, 'tournamentPredictions')),
+        getDocs(collection(db, 'users')),
+      ]);
+      const currentNames = {};
+      usersSnap.forEach(d => { currentNames[d.id] = d.data().name; });
       const picks = [];
-      snap.forEach(d => picks.push({ userId: d.id, ...d.data() }));
+      picksSnap.forEach(d => picks.push({
+        userId: d.id,
+        ...d.data(),
+        userName: currentNames[d.id] || d.data().userName || d.id,
+      }));
       setAllPicks(picks);
     } finally {
       setLoadingAll(false);
