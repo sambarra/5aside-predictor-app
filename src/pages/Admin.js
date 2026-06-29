@@ -753,7 +753,11 @@ export default function Admin({ onBack }) {
   }
 
   const now = new Date();
-  const completedFixtures = GROUP_STAGE_FIXTURES.filter(f => new Date(f.kickoff) < now);
+  const completedKnockout = knockoutFixtures.filter(f => f.kickoff && new Date(f.kickoff) < now);
+  const completedFixtures = [
+    ...GROUP_STAGE_FIXTURES.filter(f => new Date(f.kickoff) < now),
+    ...completedKnockout,
+  ].sort((a, b) => new Date(b.kickoff) - new Date(a.kickoff)); // most recent first
 
   return (
     <div className="page">
@@ -820,7 +824,8 @@ export default function Admin({ onBack }) {
             </div>
 
             {selected && (() => {
-              const f = GROUP_STAGE_FIXTURES.find(x => x.id === selected);
+              const f = GROUP_STAGE_FIXTURES.find(x => x.id === selected)
+                || knockoutFixtures.find(x => x.id === selected);
               return (
                 <div className="card">
                   <p style={{ fontWeight: 700, marginBottom: 12, fontSize: 13 }}>{f.home} vs {f.away}</p>
