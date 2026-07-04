@@ -147,7 +147,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
                 type="number" min="0" max="20"
                 value={homeScore}
                 onChange={e => { setHomeScore(e.target.value); setSaved(false); }}
-                placeholder="0"
+                placeholder="–"
               />
               <span className="score-dash">-</span>
               <input
@@ -155,7 +155,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
                 type="number" min="0" max="20"
                 value={awayScore}
                 onChange={e => { setAwayScore(e.target.value); setSaved(false); }}
-                placeholder="0"
+                placeholder="–"
               />
             </div>
           )}
