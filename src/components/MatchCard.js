@@ -123,7 +123,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
               <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'Bebas Neue, sans-serif', minWidth: 28, textAlign: 'center', color: 'var(--green)' }}>
                 {fixture.result.home}
               </span>
-              <span className="score-dash">-</span>
+              <span className="score-dash">v</span>
               <span style={{ fontSize: 22, fontWeight: 800, fontFamily: 'Bebas Neue, sans-serif', minWidth: 28, textAlign: 'center', color: 'var(--green)' }}>
                 {fixture.result.away}
               </span>
@@ -134,7 +134,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
               <div className="score-input" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: hasPrediction ? 0.8 : 0.35, fontFamily: 'Bebas Neue, sans-serif', fontSize: 22 }}>
                 {hasPrediction ? prediction.homeScore : '–'}
               </div>
-              <span className="score-dash">-</span>
+              <span className="score-dash">v</span>
               <div className="score-input" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: hasPrediction ? 0.8 : 0.35, fontFamily: 'Bebas Neue, sans-serif', fontSize: 22 }}>
                 {hasPrediction ? prediction.awayScore : '–'}
               </div>
@@ -149,7 +149,7 @@ export default function MatchCard({ fixture, prediction, onSave, isLocked, boost
                 onChange={e => { setHomeScore(e.target.value); setSaved(false); }}
                 placeholder="–"
               />
-              <span className="score-dash">-</span>
+              <span className="score-dash">v</span>
               <input
                 className={`score-input ${awayScore !== '' ? 'filled' : ''}`}
                 type="number" min="0" max="20"
