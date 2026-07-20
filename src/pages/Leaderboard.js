@@ -4,6 +4,7 @@ import { db } from '../firebase';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '../hooks/useAuth';
 import { GROUP_STAGE_FIXTURES, SCORING } from '../data/fixtures';
+import CelebrationOverlay from '../components/CelebrationOverlay';
 import { STAGES } from '../data/knockoutFixtures';
 
 // Mini sparkline component for points progression
@@ -99,6 +100,8 @@ export default function Leaderboard() {
   const [activeTab, setActiveTab] = useState(null); // null = will default to first mini league or global
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [funStats, setFunStats] = useState(null);
+  const [showCelebration, setShowCelebration] = useState(true);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -241,6 +244,62 @@ export default function Leaderboard() {
         .sort((a, b) => b.points - a.points);
 
       setPlayers(sorted);
+
+      // ── Fun stats for the end-of-tournament celebration screen ──────────
+      const fixtureLabelMap = {};
+      sortedFixtures.forEach(f => { fixtureLabelMap[f.id] = `${f.home} vs ${f.away}`; });
+
+      let lastGroupIdx = -1;
+      sortedFixtures.forEach((f, i) => { if ((f.stage || 'group') === 'group') lastGroupIdx = i; });
+
+      let longestStreak = { name: '', streak: 0 };
+      let biggestHaul = { name: '', points: 0, label: '' };
+      const groupEndPoints = {};
+
+      sorted.forEach(p => {
+        // Longest streak of correct scores
+        let curStreak = 0, maxStreak = 0;
+        p.form.forEach(fe => {
+          const entry = typeof fe === 'object' ? fe : { r: fe };
+          if (entry.r === 'E') { curStreak++; maxStreak = Math.max(maxStreak, curStreak); }
+          else curStreak = 0;
+        });
+        if (maxStreak > longestStreak.streak) longestStreak = { name: p.name, streak: maxStreak };
+
+        // Biggest single-match haul (delta between consecutive cumulative totals)
+        let prevCum = 0;
+        p.history.forEach(h => {
+          const diff = h.cumulative - prevCum;
+          if (diff > biggestHaul.points) {
+            biggestHaul = { name: p.name, points: diff, label: fixtureLabelMap[h.matchId] || '' };
+          }
+          prevCum = h.cumulative;
+        });
+
+        // Cumulative points at end of group stage (for "most improved")
+        groupEndPoints[p.id] = (lastGroupIdx >= 0 && p.history[lastGroupIdx])
+          ? p.history[lastGroupIdx].cumulative : 0;
+      });
+
+      // Rank at group-stage-end vs final rank
+      const groupRanked = [...sorted].sort((a, b) => (groupEndPoints[b.id] || 0) - (groupEndPoints[a.id] || 0));
+      const groupRankMap = {};
+      groupRanked.forEach((p, i) => { groupRankMap[p.id] = i + 1; });
+
+      let mostImproved = { name: '', climb: 0 };
+      sorted.forEach((p, i) => {
+        const finalRank = i + 1;
+        const groupRank = groupRankMap[p.id] || finalRank;
+        const climb = groupRank - finalRank;
+        if (climb > mostImproved.climb) mostImproved = { name: p.name, climb };
+      });
+
+      setFunStats({
+        longestStreak,
+        biggestHaul,
+        mostImproved,
+        podium: sorted.slice(0, 3).map(p => ({ name: p.name, points: p.points })),
+      });
     } finally {
       setLoading(false);
     }
@@ -386,6 +445,9 @@ export default function Leaderboard() {
 
   return (
     <div className="page">
+      {showCelebration && funStats && (
+        <CelebrationOverlay stats={funStats} onClose={() => setShowCelebration(false)} />
+      )}
       <h1 className="page-title">📊 Rankings</h1>
 
       {/* My position card */}
