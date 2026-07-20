@@ -71,6 +71,70 @@ function PodiumSlide({ stats, onClose }) {
 export default function CelebrationOverlay({ stats, onClose }) {
   const [slide, setSlide] = useState(0);
 
+  // Build the ordered list of insight slides, skipping any with no meaningful data
+  const insightSlides = [
+    stats.mostCorrectScores.count > 0 && {
+      emoji: '🎯',
+      title: `${stats.mostCorrectScores.count} exact scores`,
+      subtitle: 'Most correct scores overall',
+      body: stats.mostCorrectScores.name,
+    },
+    stats.longestScoreStreak.streak > 0 && {
+      emoji: '🔥',
+      title: `${stats.longestScoreStreak.streak} in a row`,
+      subtitle: 'Longest correct-score streak',
+      body: stats.longestScoreStreak.name,
+    },
+    stats.longestUnbeatenStreak.streak > 0 && {
+      emoji: '🛡️',
+      title: `${stats.longestUnbeatenStreak.streak} matches unbeaten`,
+      subtitle: 'Longest streak without a wrong prediction',
+      body: stats.longestUnbeatenStreak.name,
+    },
+    stats.mostImproved.climb > 0 && {
+      emoji: '📈',
+      title: `+${stats.mostImproved.climb} places`,
+      subtitle: 'Biggest climb since the group stage',
+      body: stats.mostImproved.name,
+    },
+    stats.biggestHaul.points > 0 && {
+      emoji: '💥',
+      title: `${stats.biggestHaul.points} pts`,
+      subtitle: 'Biggest single-match haul',
+      body: `${stats.biggestHaul.name}${stats.biggestHaul.label ? ' — ' + stats.biggestHaul.label : ''}`,
+    },
+    stats.sharpshooter.count > 0 && {
+      emoji: '⚽',
+      title: `${stats.sharpshooter.count} correct`,
+      subtitle: 'Sharpest 1st-goalscorer sense',
+      body: stats.sharpshooter.name,
+    },
+    stats.marginMaster.count > 0 && {
+      emoji: '🤏',
+      title: `${stats.marginMaster.count} bonuses`,
+      subtitle: 'Margin master — most GD bonuses',
+      body: stats.marginMaster.name,
+    },
+    stats.knockoutKing.points > 0 && {
+      emoji: '👑',
+      title: `${stats.knockoutKing.points} pts`,
+      subtitle: 'Knockout King — most points from R32 onward',
+      body: stats.knockoutKing.name,
+    },
+    stats.bestTournamentPick.points > 0 && {
+      emoji: '🏅',
+      title: `+${stats.bestTournamentPick.points} pts`,
+      subtitle: 'Best tournament picks',
+      body: `${stats.bestTournamentPick.name} — ${stats.bestTournamentPick.categories.join(', ')}`,
+    },
+    stats.crowdWisdom && {
+      emoji: '🗳️',
+      title: `${stats.crowdWisdom.pct}%`,
+      subtitle: 'Crowd wisdom',
+      body: `${stats.crowdWisdom.correct} of ${stats.crowdWisdom.total} players called the champions`,
+    },
+  ].filter(Boolean);
+
   const slides = [
     {
       emoji: '🏆',
@@ -78,26 +142,7 @@ export default function CelebrationOverlay({ stats, onClose }) {
       subtitle: 'Final Standings',
       body: 'Tap to see the highlights',
     },
-    {
-      emoji: '🔥',
-      title: stats.longestStreak.streak > 0 ? `${stats.longestStreak.streak} in a row` : 'No streak this year',
-      subtitle: 'Longest correct-score streak',
-      body: stats.longestStreak.streak > 0 ? stats.longestStreak.name : '',
-    },
-    {
-      emoji: '📈',
-      title: stats.mostImproved.climb > 0 ? `+${stats.mostImproved.climb} places` : '—',
-      subtitle: 'Biggest climb since the group stage',
-      body: stats.mostImproved.climb > 0 ? stats.mostImproved.name : '',
-    },
-    {
-      emoji: '💥',
-      title: stats.biggestHaul.points > 0 ? `${stats.biggestHaul.points} pts` : '—',
-      subtitle: 'Biggest single-match haul',
-      body: stats.biggestHaul.points > 0
-        ? `${stats.biggestHaul.name}${stats.biggestHaul.label ? ' — ' + stats.biggestHaul.label : ''}`
-        : '',
-    },
+    ...insightSlides,
     { podium: true },
   ];
 
@@ -124,10 +169,13 @@ export default function CelebrationOverlay({ stats, onClose }) {
         }}
       >✕</button>
 
-      <div style={{ display: 'flex', gap: 6, position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
+      <div style={{
+        display: 'flex', gap: 4, position: 'absolute', top: 24, left: 24, right: 24,
+        zIndex: 2, flexWrap: 'wrap', justifyContent: 'center',
+      }}>
         {slides.map((_, i) => (
           <div key={i} style={{
-            width: 8, height: 8, borderRadius: '50%',
+            width: 7, height: 7, borderRadius: '50%',
             background: i === slide ? 'var(--green)' : 'rgba(255,255,255,0.25)',
             transition: 'background 0.2s',
           }} />
@@ -136,19 +184,21 @@ export default function CelebrationOverlay({ stats, onClose }) {
 
       {!s.podium ? (
         <div onClick={next} style={{ textAlign: 'center', cursor: 'pointer', maxWidth: 400 }}>
-          <div style={{ fontSize: 64, marginBottom: 16 }}>{s.emoji}</div>
-          <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 40, color: 'var(--green)', letterSpacing: '0.02em' }}>
+          <div style={{ fontSize: 60, marginBottom: 16 }}>{s.emoji}</div>
+          <div style={{ fontFamily: 'Bebas Neue, sans-serif', fontSize: 38, color: 'var(--green)', letterSpacing: '0.02em' }}>
             {s.title}
           </div>
-          <div style={{ fontSize: 14, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 8 }}>
+          <div style={{ fontSize: 13, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 8 }}>
             {s.subtitle}
           </div>
           {s.body && (
-            <div style={{ fontSize: 22, fontWeight: 700, color: 'white', marginTop: 20 }}>
+            <div style={{ fontSize: 20, fontWeight: 700, color: 'white', marginTop: 18 }}>
               {s.body}
             </div>
           )}
-          <div style={{ marginTop: 40, fontSize: 12, color: 'var(--text-3)' }}>Tap to continue →</div>
+          <div style={{ marginTop: 36, fontSize: 12, color: 'var(--text-3)' }}>
+            Tap to continue → ({slide + 1}/{slides.length})
+          </div>
         </div>
       ) : (
         <PodiumSlide stats={stats} onClose={onClose} />

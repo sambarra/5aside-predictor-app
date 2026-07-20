@@ -247,38 +247,68 @@ export default function Leaderboard() {
 
       // ── Fun stats for the end-of-tournament celebration screen ──────────
       const fixtureLabelMap = {};
-      sortedFixtures.forEach(f => { fixtureLabelMap[f.id] = `${f.home} vs ${f.away}`; });
+      const fixtureStageMap = {};
+      sortedFixtures.forEach(f => {
+        fixtureLabelMap[f.id] = `${f.home} vs ${f.away}`;
+        fixtureStageMap[f.id] = f.stage || 'group';
+      });
 
       let lastGroupIdx = -1;
       sortedFixtures.forEach((f, i) => { if ((f.stage || 'group') === 'group') lastGroupIdx = i; });
 
-      let longestStreak = { name: '', streak: 0 };
+      let longestScoreStreak = { name: '', streak: 0 };
+      let longestUnbeatenStreak = { name: '', streak: 0 };
       let biggestHaul = { name: '', points: 0, label: '' };
+      let mostCorrectScores = { name: '', count: 0 };
+      let sharpshooter = { name: '', count: 0 };
+      let marginMaster = { name: '', count: 0 };
+      let knockoutKing = { name: '', points: 0 };
       const groupEndPoints = {};
 
       sorted.forEach(p => {
-        // Longest streak of correct scores
-        let curStreak = 0, maxStreak = 0;
+        // Longest streak of exact-score hits
+        let curScoreStreak = 0, maxScoreStreak = 0;
+        // Longest streak of "never wrong" (exact or correct-result, broken only by a wrong)
+        let curUnbeaten = 0, maxUnbeaten = 0;
+
         p.form.forEach(fe => {
           const entry = typeof fe === 'object' ? fe : { r: fe };
-          if (entry.r === 'E') { curStreak++; maxStreak = Math.max(maxStreak, curStreak); }
-          else curStreak = 0;
-        });
-        if (maxStreak > longestStreak.streak) longestStreak = { name: p.name, streak: maxStreak };
+          if (entry.r === 'E') { curScoreStreak++; maxScoreStreak = Math.max(maxScoreStreak, curScoreStreak); }
+          else curScoreStreak = 0;
 
-        // Biggest single-match haul (delta between consecutive cumulative totals)
+          if (entry.r === 'E' || entry.r === 'R') { curUnbeaten++; maxUnbeaten = Math.max(maxUnbeaten, curUnbeaten); }
+          else if (entry.r === 'W') curUnbeaten = 0;
+          // no-prediction ('-') doesn't break or extend the streak
+        });
+
+        if (maxScoreStreak > longestScoreStreak.streak) longestScoreStreak = { name: p.name, streak: maxScoreStreak };
+        if (maxUnbeaten > longestUnbeatenStreak.streak) longestUnbeatenStreak = { name: p.name, streak: maxUnbeaten };
+
+        // Biggest single-match haul + knockout-only points (delta between consecutive cumulative totals)
         let prevCum = 0;
+        let knockoutPts = 0;
         p.history.forEach(h => {
           const diff = h.cumulative - prevCum;
           if (diff > biggestHaul.points) {
             biggestHaul = { name: p.name, points: diff, label: fixtureLabelMap[h.matchId] || '' };
           }
+          if (fixtureStageMap[h.matchId] && fixtureStageMap[h.matchId] !== 'group') knockoutPts += diff;
           prevCum = h.cumulative;
         });
+        if (knockoutPts > knockoutKing.points) knockoutKing = { name: p.name, points: knockoutPts };
 
         // Cumulative points at end of group stage (for "most improved")
         groupEndPoints[p.id] = (lastGroupIdx >= 0 && p.history[lastGroupIdx])
           ? p.history[lastGroupIdx].cumulative : 0;
+
+        // Most correct scores overall
+        if ((p.correctScores || 0) > mostCorrectScores.count) mostCorrectScores = { name: p.name, count: p.correctScores || 0 };
+
+        // Sharpest goalscorer sense
+        if ((p.scorerHits || 0) > sharpshooter.count) sharpshooter = { name: p.name, count: p.scorerHits || 0 };
+
+        // Margin master (most GD/winning-margin bonuses)
+        if ((p.gdBonus || 0) > marginMaster.count) marginMaster = { name: p.name, count: p.gdBonus || 0 };
       });
 
       // Rank at group-stage-end vs final rank
@@ -294,10 +324,46 @@ export default function Leaderboard() {
         if (climb > mostImproved.climb) mostImproved = { name: p.name, climb };
       });
 
+      // Best tournament picks — most tournament bonus points earned
+      let bestTournamentPick = { name: '', points: 0, categories: [] };
+      let championPickers = 0;
+      let totalTournamentPredictors = 0;
+
+      if (tournamentResult) {
+        sorted.forEach(p => {
+          const tp = tournamentPreds[p.id];
+          if (!tp) return;
+          if (tp.winner || tp.runner_up || tp.third || tp.golden_boot) totalTournamentPredictors++;
+          if (tp.winner && tp.winner === tournamentResult.winner) championPickers++;
+
+          let bonus = 0;
+          const categories = [];
+          if (tp.winner && tp.winner === tournamentResult.winner) { bonus += 30; categories.push('Winner'); }
+          if (tp.runner_up && tp.runner_up === tournamentResult.runner_up) { bonus += 20; categories.push('Runner-up'); }
+          if (tp.third && tp.third === tournamentResult.third) { bonus += 10; categories.push('Third place'); }
+          if (tp.golden_boot && tp.golden_boot === tournamentResult.golden_boot) { bonus += 20; categories.push('Golden Boot'); }
+
+          if (bonus > bestTournamentPick.points) {
+            bestTournamentPick = { name: p.name, points: bonus, categories };
+          }
+        });
+      }
+
+      const crowdWisdom = totalTournamentPredictors > 0
+        ? { correct: championPickers, total: totalTournamentPredictors, pct: Math.round((championPickers / totalTournamentPredictors) * 100) }
+        : null;
+
       setFunStats({
-        longestStreak,
-        biggestHaul,
+        mostCorrectScores,
+        longestScoreStreak,
+        longestUnbeatenStreak,
         mostImproved,
+        biggestHaul,
+        sharpshooter,
+        marginMaster,
+        knockoutKing,
+        bestTournamentPick,
+        crowdWisdom,
         podium: sorted.slice(0, 3).map(p => ({ name: p.name, points: p.points })),
       });
     } finally {
