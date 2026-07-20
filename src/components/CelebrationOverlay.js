@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 function PodiumBlock({ place, name, points, height, color }) {
   return (
@@ -44,7 +46,89 @@ function ConfettiLayer() {
   );
 }
 
-function PodiumSlide({ stats, onClose }) {
+function EmailSignup({ user }) {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('checking'); // checking | idle | submitting | done | error
+  const [errMsg, setErrMsg] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      if (!user?.id) { setStatus('idle'); return; }
+      try {
+        const snap = await getDoc(doc(db, 'plInterest', user.id));
+        if (!cancelled) setStatus(snap.exists() ? 'done' : 'idle');
+      } catch {
+        if (!cancelled) setStatus('idle');
+      }
+    }
+    check();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  async function submit() {
+    const trimmed = email.trim();
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+    if (!valid) { setErrMsg('Enter a valid email'); return; }
+    setErrMsg('');
+    setStatus('submitting');
+    try {
+      await setDoc(doc(db, 'plInterest', user.id), {
+        email: trimmed,
+        userName: user.name || '',
+        submittedAt: new Date().toISOString(),
+      });
+      setStatus('done');
+    } catch {
+      setErrMsg('Something went wrong — try again');
+      setStatus('idle');
+    }
+  }
+
+  if (status === 'checking') return null;
+
+  if (status === 'done') {
+    return (
+      <div style={{
+        marginTop: 4, fontSize: 13, color: 'var(--green)', fontWeight: 600,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}>
+        ✓ You're on the list — we'll email you when it's ready!
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ marginTop: 4, marginBottom: 4 }} onClick={e => e.stopPropagation()}>
+      <div style={{ fontSize: 12, color: 'var(--text-2)', marginBottom: 8 }}>
+        Want in on the Premier League Predictor?
+      </div>
+      <div style={{ display: 'flex', gap: 8, maxWidth: 320, margin: '0 auto' }}>
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') submit(); }}
+          placeholder="you@email.com"
+          className="input"
+          style={{ flex: 1, fontSize: 14 }}
+          disabled={status === 'submitting'}
+        />
+        <button
+          onClick={submit}
+          className="btn btn-primary"
+          disabled={status === 'submitting'}
+          style={{ padding: '0 16px', whiteSpace: 'nowrap' }}
+        >
+          {status === 'submitting' ? '…' : 'Notify me'}
+        </button>
+      </div>
+      {errMsg && <div style={{ fontSize: 11, color: 'var(--red)', marginTop: 6 }}>{errMsg}</div>}
+    </div>
+  );
+}
+
+function PodiumSlide({ stats, onClose, user }) {
   const [p1, p2, p3] = stats.podium;
   return (
     <div style={{ textAlign: 'center', maxWidth: 440, position: 'relative', zIndex: 1 }}>
@@ -58,20 +142,22 @@ function PodiumSlide({ stats, onClose }) {
         {p3 && <PodiumBlock place={3} name={p3.name} points={p3.points} height={68} color="#CD7F32" />}
       </div>
       <div style={{ fontSize: 16, color: 'white', marginBottom: 8, fontWeight: 600 }}>Thanks for playing! 🙌</div>
-      <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 28, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 20, lineHeight: 1.5 }}>
         See you for the 5aside.com<br />Premier League Predictor… coming soon 👋
       </div>
-      <button onClick={onClose} className="btn btn-primary" style={{ padding: '12px 28px' }}>
+
+      <EmailSignup user={user} />
+
+      <button onClick={onClose} className="btn btn-primary" style={{ padding: '12px 28px', marginTop: 20 }}>
         View Rankings →
       </button>
     </div>
   );
 }
 
-export default function CelebrationOverlay({ stats, onClose }) {
+export default function CelebrationOverlay({ stats, onClose, user }) {
   const [slide, setSlide] = useState(0);
 
-  // Build the ordered list of insight slides, skipping any with no meaningful data
   const insightSlides = [
     stats.mostCorrectScores.count > 0 && {
       emoji: '🎯',
@@ -201,7 +287,7 @@ export default function CelebrationOverlay({ stats, onClose }) {
           </div>
         </div>
       ) : (
-        <PodiumSlide stats={stats} onClose={onClose} />
+        <PodiumSlide stats={stats} onClose={onClose} user={user} />
       )}
     </div>
   );

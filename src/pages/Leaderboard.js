@@ -512,7 +512,7 @@ export default function Leaderboard() {
   return (
     <div className="page">
       {showCelebration && funStats && (
-        <CelebrationOverlay stats={funStats} onClose={() => setShowCelebration(false)} />
+        <CelebrationOverlay stats={funStats} onClose={() => setShowCelebration(false)} user={user} />
       )}
       <h1 className="page-title">📊 Rankings</h1>
 
