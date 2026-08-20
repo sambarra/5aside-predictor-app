@@ -120,19 +120,22 @@ function AppInner() {
 
   // Top bar — always the same
   const TopBar = () => (
-    <div className="top-bar">
-      <a href="https://5aside.com" target="_blank" rel="noopener noreferrer"><img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} /></a>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          {user.name}
-        </span>
-        <button
-          className="btn btn-ghost btn-sm"
-          style={{ padding: '6px 10px', fontSize: 12 }}
-          onClick={() => { if (window.confirm('Log out?')) logout(); }}
-        >
-          Log out
-        </button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <a href="https://wc2026.5aside.com" style={{ display: 'block', textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'var(--green)', background: 'rgba(0,255,106,0.08)', border: '1px solid rgba(0,255,106,0.2)', borderRadius: 8, padding: '6px 10px', margin: '10px 16px 0', textDecoration: 'none' }}>📌 This World Cup predictor now lives at wc2026.5aside.com — bookmark it here</a>
+      <div className="top-bar">
+        <a href="https://5aside.com" target="_blank" rel="noopener noreferrer"><img src="/5aside-logo.svg" alt="5aside.com" style={{ height: 26, maxWidth: 130 }} /></a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            {user.name}
+          </span>
+          <button
+            className="btn btn-ghost btn-sm"
+            style={{ padding: '6px 10px', fontSize: 12 }}
+            onClick={() => { if (window.confirm('Log out?')) logout(); }}
+          >
+            Log out
+          </button>
+        </div>
       </div>
     </div>
   );
